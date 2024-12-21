@@ -9,8 +9,6 @@ pub struct NewsPost {
     pub title: Option<String>,
     /// A summary of the post.
     pub summary: Option<String>,
-    /// The content of the post.
-    pub content: Option<String>,
     /// A link to the post.
     pub link: Option<String>,
     /// The author of the post.
@@ -31,26 +29,16 @@ pub(crate) trait ScrappableWebPage {
 }
 
 /// The web scraper engine is used to scrape web pages.
-pub struct WebScrapperEngine<P>
-where
-    P: ScrappableWebPage,
-{
-    web_page: P,
-}
+pub struct WebScrapperEngine;
 
-impl<P> WebScrapperEngine<P>
-where
-    P: ScrappableWebPage,
-{
-    /// Creates a new instance of WebScrapperEngine
-    pub async fn new(web_page: P) -> Result<Self, anyhow::Error> {
-        Ok(WebScrapperEngine { web_page })
-    }
+impl WebScrapperEngine {
+    pub async fn get_posts<P>(web_page: P) -> Result<Vec<NewsPost>, anyhow::Error>
+    where
+        P: ScrappableWebPage,
+    {
+        let body = reqwest::get(web_page.get_url()).await?.text().await?;
 
-    pub async fn get_posts(&self) -> Result<Vec<NewsPost>, anyhow::Error> {
-        let body = reqwest::get(self.web_page.get_url()).await?.text().await?;
-
-        let results = self.web_page.get_posts(body)?;
+        let results = web_page.get_posts(body)?;
         Ok(results)
     }
 }

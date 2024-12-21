@@ -45,7 +45,6 @@ impl ScrappableWebPage for G4Media {
                 image: None,
                 title: None,
                 summary: None,
-                content: None,
                 link: None,
                 author: None,
             };

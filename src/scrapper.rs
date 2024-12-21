@@ -1,7 +1,7 @@
 pub(crate) mod gfourmedia;
 
 /// NewsPost represents a news post.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewsPost {
     /// A URL containing the image of the post.
     pub image: Option<String>,

@@ -50,7 +50,7 @@ impl RedisService {
             .exec_async(&mut self.multiplexed_connection)
             .await;
         if result.is_err() {
-            error!("Failed to publish {:?} to stream", post);
+            error!("Failed to publish {:?} to stream", result);
         }
     }
 }

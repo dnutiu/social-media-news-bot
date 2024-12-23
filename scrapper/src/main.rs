@@ -87,7 +87,8 @@ async fn main() -> Result<(), anyhow::Error> {
         if news_post.is_complete() {
             let title = news_post.title.clone().unwrap();
             if redis_service.is_post_seen(&title).await {
-                redis_service.publish(news_post).await;
+                redis_service.publish(&news_post).await;
+                info!("Published {:?}", news_post);
                 redis_service.mark_post_seen(&title, 60 * 60 * 24 * 3).await;
             };
         }

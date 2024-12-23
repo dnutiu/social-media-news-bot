@@ -41,7 +41,7 @@ impl RedisService {
     }
 
     /// Publishes the post to the redis stream.
-    pub async fn publish(&mut self, post: NewsPost) {
+    pub async fn publish(&mut self, post: &NewsPost) {
         let serialized_post = serde_json::to_string(&post).unwrap();
         let result = redis::cmd("XADD")
             .arg(format!("posts:{}", self.stream_name))

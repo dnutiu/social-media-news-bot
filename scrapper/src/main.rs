@@ -73,7 +73,7 @@ async fn main() -> Result<(), anyhow::Error> {
     })
     .expect("Error setting Ctrl-C handler");
 
-    run_scrapping_job(&mut scheduler, tx, args.scrape_interval_minutes.minutes());
+    run_scrapping_job(&mut scheduler, tx, 60.seconds());
 
     // Run the scheduler in a separate thread.
     let handle = run_scheduler(scheduler, running.clone());
@@ -86,7 +86,7 @@ async fn main() -> Result<(), anyhow::Error> {
         info!("Received post {:?}", news_post);
         if news_post.is_complete() {
             let title = news_post.title.clone().unwrap();
-            if redis_service.is_post_seen(&title).await {
+            if !redis_service.is_post_seen(&title).await {
                 redis_service.publish(&news_post).await;
                 info!("Published {:?}", news_post);
                 redis_service.mark_post_seen(&title, 60 * 60 * 24 * 3).await;

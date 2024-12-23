@@ -41,16 +41,20 @@ impl RedisService {
     }
 
     /// Publishes the post to the redis stream.
-    pub async fn publish(&mut self, post: &NewsPost) {
+    /// Returns a `bool` that is true if the post was published and false otherwise.
+    pub async fn publish(&mut self, post: &NewsPost) -> bool {
         let serialized_post = serde_json::to_string(&post).unwrap();
         let result = redis::cmd("XADD")
             .arg(format!("posts:{}", self.stream_name))
             .arg("*")
+            .arg("post_data")
             .arg(serialized_post)
             .exec_async(&mut self.multiplexed_connection)
             .await;
         if result.is_err() {
             error!("Failed to publish {:?} to stream", result);
-        }
+            return false;
+        };
+        true
     }
 }

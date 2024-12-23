@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 pub(crate) mod gfourmedia;
 
 /// NewsPost represents a news post.
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewsPost {
     /// A URL containing the image of the post.
     pub image: Option<String>,

@@ -1,5 +1,8 @@
+use crate::cli::CliArgs;
+use crate::redis::RedisService;
 use crate::scrapper::gfourmedia::G4Media;
 use crate::scrapper::{NewsPost, WebScrapperEngine};
+use clap::Parser;
 use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use log::{debug, error, info};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -8,46 +11,9 @@ use std::sync::{mpsc, Arc};
 use std::time::Duration;
 use tokio::task::JoinHandle;
 
+mod cli;
+mod redis;
 mod scrapper;
-
-#[tokio::main]
-async fn main() -> Result<(), anyhow::Error> {
-    env_logger::init();
-    info!("Starting the program");
-
-    // Scheduler setup
-    let mut scheduler = AsyncScheduler::new();
-
-    // Channel for synchronizing the scrapper and the bot
-    let (tx, rx): (Sender<NewsPost>, Receiver<NewsPost>) = mpsc::channel();
-
-    // Graceful shutdown.
-    let running = Arc::new(AtomicBool::new(true));
-    let r = running.clone();
-    ctrlc::set_handler(move || {
-        r.store(false, Ordering::SeqCst);
-    })
-    .expect("Error setting Ctrl-C handler");
-
-    run_scrapping_job(&mut scheduler, tx, 60.minutes());
-
-    // Run the scheduler in a separate thread.
-    let handle = run_scheduler(scheduler, running.clone());
-
-    for news_post in rx.iter() {
-        if !running.load(Ordering::SeqCst) {
-            debug!("Used requested shutdown.");
-            break;
-        }
-        info!("Received post {:?}", news_post)
-    }
-
-    info!("Stopped the program");
-
-    handle.await?;
-
-    Ok(())
-}
 
 /// Runs the scheduler in a separated thread.
 ///
@@ -81,4 +47,55 @@ fn run_scrapping_job(scheduler: &mut AsyncScheduler, tx: Sender<NewsPost>, inter
             });
         }
     });
+}
+
+#[tokio::main]
+async fn main() -> Result<(), anyhow::Error> {
+    env_logger::init();
+    let args = CliArgs::parse();
+    info!("Starting the program");
+
+    // Redis setup
+    let mut redis_service =
+        RedisService::new(args.redis_connection_string, args.redis_stream_name).await;
+
+    // Scheduler setup
+    let mut scheduler = AsyncScheduler::new();
+
+    // Channel for synchronizing the scrapper and the bot
+    let (tx, rx): (Sender<NewsPost>, Receiver<NewsPost>) = mpsc::channel();
+
+    // Graceful shutdown.
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl-C handler");
+
+    run_scrapping_job(&mut scheduler, tx, args.scrape_interval_minutes.minutes());
+
+    // Run the scheduler in a separate thread.
+    let handle = run_scheduler(scheduler, running.clone());
+
+    for news_post in rx.iter() {
+        if !running.load(Ordering::SeqCst) {
+            debug!("Used requested shutdown.");
+            break;
+        }
+        info!("Received post {:?}", news_post);
+        if news_post.is_complete() {
+            let title = news_post.title.clone().unwrap();
+            if redis_service.is_post_seen(&title).await {
+                redis_service.publish(news_post).await;
+                redis_service.mark_post_seen(&title, 60 * 60 * 24 * 3).await;
+            };
+        }
+    }
+
+    info!("Stopped the program");
+
+    handle.await?;
+
+    Ok(())
 }

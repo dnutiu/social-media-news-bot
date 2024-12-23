@@ -12,3 +12,8 @@ scraper = "0.22.0"
 clokwerk = "0.4.0"
 log = "0.4.22"
 ctrlc = "3.4.5"
+clap = { version = "4.5.23", features = ["derive"] }
+redis = { version = "0.27.6", features = ["tokio-comp"] }
+md5 = "0.7.0"
+serde = { version = "1.0.216", features = ["derive"] }
+serde_json = "1.0.134"

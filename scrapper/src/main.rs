@@ -29,7 +29,7 @@ async fn main() -> Result<(), anyhow::Error> {
     })
     .expect("Error setting Ctrl-C handler");
 
-    run_scrapping_job(&mut scheduler, tx, 60.seconds());
+    run_scrapping_job(&mut scheduler, tx, 60.minutes());
 
     // Run the scheduler in a separate thread.
     let handle = run_scheduler(scheduler, running.clone());

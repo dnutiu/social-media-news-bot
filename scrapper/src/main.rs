@@ -57,7 +57,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // Redis setup
     let mut redis_service =
-        RedisService::new(args.redis_connection_string, args.redis_stream_name).await;
+        RedisService::new(&args.redis_connection_string, &args.redis_stream_name).await;
 
     // Scheduler setup
     let mut scheduler = AsyncScheduler::new();

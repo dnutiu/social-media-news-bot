@@ -10,13 +10,13 @@ pub struct RedisService {
 
 impl RedisService {
     /// Creates a new RedisService instance.
-    pub async fn new(connection_string: String, stream_name: String) -> Self {
+    pub async fn new(connection_string: &str, stream_name: &str) -> Self {
         let client = redis::Client::open(connection_string).unwrap();
         let con = client.get_multiplexed_async_connection().await.unwrap();
 
         RedisService {
             multiplexed_connection: con,
-            stream_name,
+            stream_name: stream_name.to_string(),
         }
     }
 
@@ -56,5 +56,77 @@ impl RedisService {
             return false;
         };
         true
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::distributions::{Alphanumeric, DistString};
+    use redis::RedisResult;
+
+    const REDIS_CONNECTION_STRING: &str = "redis://localhost:6379";
+
+    #[tokio::test]
+    async fn test_redis_service_new() {
+        let _ = RedisService::new(REDIS_CONNECTION_STRING, "a").await;
+    }
+
+    #[tokio::test]
+    async fn test_redis_service_is_post_seen_false() {
+        // Setup
+        let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
+        let random_post = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
+
+        let mut service = RedisService::new(REDIS_CONNECTION_STRING, &random_stream_name).await;
+
+        // Test
+        let result = service.is_post_seen(&random_post).await;
+
+        // Assert
+        assert_eq!(result, false);
+    }
+
+    #[tokio::test]
+    async fn test_redis_service_is_post_seen_true() {
+        // Setup
+        let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
+        let random_post = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
+
+        let mut service = RedisService::new(REDIS_CONNECTION_STRING, &random_stream_name).await;
+        service.mark_post_seen(&random_post, 10).await;
+
+        // Test
+        let result = service.is_post_seen(&random_post).await;
+
+        // Assert
+        assert_eq!(result, true);
+    }
+
+    #[tokio::test]
+    async fn test_redis_service_publish() {
+        // Setup
+        let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
+
+        let mut service = RedisService::new(REDIS_CONNECTION_STRING, &random_stream_name).await;
+
+        // Test
+        let post = NewsPost {
+            image: Some(String::from("i")),
+            title: Some(String::from("t")),
+            summary: Some(String::from("s")),
+            link: Some(String::from("l")),
+            author: Some(String::from("a")),
+        };
+        let result = service.publish(&post).await;
+
+        let stream_length: RedisResult<i32> = redis::cmd("XLEN")
+            .arg(&random_stream_name)
+            .query_async(&mut service.multiplexed_connection)
+            .await;
+
+        // Assert
+        assert_eq!(result, true);
+        assert_eq!(stream_length, Ok(0));
     }
 }

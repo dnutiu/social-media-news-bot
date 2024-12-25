@@ -20,3 +20,4 @@ serde_json = "1.0.134"
 
 [dev-dependencies]
 rand = "0.8.5"
+serial_test = "3.2.0"

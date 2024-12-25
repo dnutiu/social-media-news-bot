@@ -64,15 +64,26 @@ mod tests {
     use super::*;
     use rand::distributions::{Alphanumeric, DistString};
     use redis::RedisResult;
+    use serial_test::serial;
 
     const REDIS_CONNECTION_STRING: &str = "redis://localhost:6379";
 
+    /// Cleans up the database
+    async fn cleanup(redis_service: &mut RedisService) {
+        redis::cmd("flushall")
+            .exec_async(&mut redis_service.multiplexed_connection)
+            .await
+            .expect("failed to clean db")
+    }
+
     #[tokio::test]
+    #[serial]
     async fn test_redis_service_new() {
         let _ = RedisService::new(REDIS_CONNECTION_STRING, "a").await;
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_redis_service_is_post_seen_false() {
         // Setup
         let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
@@ -85,9 +96,11 @@ mod tests {
 
         // Assert
         assert_eq!(result, false);
+        cleanup(&mut service).await;
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_redis_service_is_post_seen_true() {
         // Setup
         let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
@@ -101,9 +114,11 @@ mod tests {
 
         // Assert
         assert_eq!(result, true);
+        cleanup(&mut service).await;
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_redis_service_publish() {
         // Setup
         let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
@@ -121,12 +136,13 @@ mod tests {
         let result = service.publish(&post).await;
 
         let stream_length: RedisResult<i32> = redis::cmd("XLEN")
-            .arg(&random_stream_name)
+            .arg(&format!("posts:{}", random_stream_name))
             .query_async(&mut service.multiplexed_connection)
             .await;
 
         // Assert
         assert_eq!(result, true);
-        assert_eq!(stream_length, Ok(0));
+        assert_eq!(stream_length, Ok(1));
+        cleanup(&mut service).await;
     }
 }

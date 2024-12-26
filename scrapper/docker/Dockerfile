@@ -1,4 +1,4 @@
-FROM rust:1.83.0-bookworm as planner
+FROM rust:1.83.0-bookworm AS planner
 RUN cargo install cargo-chef
 
 WORKDIR /app
@@ -21,6 +21,8 @@ RUN cargo chef cook --recipe-path recipe.json
 # Build the whole project
 COPY . .
 RUN cargo build --profile release
+
+# Run the project
 FROM rust:1.83.0-bookworm AS runner
 WORKDIR /app
 

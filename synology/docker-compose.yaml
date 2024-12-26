@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  scraper:
+    image: metonymy/scrapper
+    environment:
+      RUST_LOG: info
+    command:
+      - "--redis-connection-string"
+      - "redis://192.168.0.221:6379"
+      - "--redis-stream-name"
+      - "posts::g4media"

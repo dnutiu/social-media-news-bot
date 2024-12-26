@@ -26,4 +26,4 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/scrapper /app/scrapper
 
-ENTRYPOINT /app/scrapper
+ENTRYPOINT ["/app/scrapper"]

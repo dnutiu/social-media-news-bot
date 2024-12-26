@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "post",
+    "infrastructure",
     "scrapper",
 ]
 resolver = "2"

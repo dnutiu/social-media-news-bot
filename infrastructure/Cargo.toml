@@ -1,0 +1,20 @@
+[package]
+name = "infrastructure"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+# Note: This appears unused by the RustRover analyzer, but it works.
+# If in the future it stops working for whatever reason because the dependency has
+# the same name as the module, then we can try to rename it using `package`.
+redis = { version = "0.27.6", features = ["tokio-comp"] }
+md5 = "0.7.0"
+serde = { version = "1.0.216", features = ["derive"] }
+serde_json = "1.0.134"
+log = "0.4.22"
+
+[dev-dependencies]
+rand = "0.8.5"
+serial_test = "3.2.0"
+post = {path = "../post"}

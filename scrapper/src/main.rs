@@ -6,9 +6,11 @@ use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use infrastructure::RedisService;
 use log::{debug, error, info};
 use post::NewsPost;
+use signal_hook::{consts::SIGINT, consts::SIGTERM, iterator::Signals};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc};
+use std::thread;
 use std::time::Duration;
 use tokio::task::JoinHandle;
 
@@ -67,10 +69,20 @@ async fn main() -> Result<(), anyhow::Error> {
     // Graceful shutdown.
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
-    ctrlc::set_handler(move || {
-        r.store(false, Ordering::SeqCst);
-    })
-    .expect("Error setting Ctrl-C handler");
+
+    thread::spawn(move || {
+        let signals = Signals::new([SIGINT, SIGTERM]);
+        match signals {
+            Ok(mut signal_info) => {
+                if signal_info.forever().next().is_some() {
+                    r.store(false, Ordering::SeqCst);
+                }
+            }
+            Err(error) => {
+                error!("Failed to setup signal handler: {error}")
+            }
+        }
+    });
 
     run_scrapping_job(&mut scheduler, tx, args.scrape_interval_minutes.minutes());
 

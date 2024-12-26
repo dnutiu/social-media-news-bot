@@ -1,5 +1,4 @@
 # Docker Compose file used for testing
-version: '3.8'
 services:
   redis:
     container_name: bluesky-bot-local-redis

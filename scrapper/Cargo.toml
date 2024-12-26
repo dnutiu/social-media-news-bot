@@ -11,7 +11,7 @@ reqwest = "0.12.9"
 scraper = "0.22.0"
 clokwerk = "0.4.0"
 log = "0.4.22"
-ctrlc = "3.4.5"
 clap = { version = "4.5.23", features = ["derive"] }
 post = {path = "../post"}
 infrastructure = { path = "../infrastructure"}
+signal-hook = "0.3.17"

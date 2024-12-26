@@ -1,5 +1,5 @@
-use crate::scrapper::NewsPost;
 use log::error;
+use post::NewsPost;
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisError};
 

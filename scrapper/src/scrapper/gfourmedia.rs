@@ -1,5 +1,6 @@
-use crate::scrapper::{NewsPost, ScrappableWebPage};
+use crate::scrapper::ScrappableWebPage;
 use anyhow::anyhow;
+use post::NewsPost;
 use scraper::{Html, Selector};
 
 #[derive(Debug)]

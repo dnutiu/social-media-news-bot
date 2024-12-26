@@ -1,10 +1,11 @@
 use crate::cli::CliArgs;
-use crate::redis::RedisService;
+use crate::redis_service::RedisService;
 use crate::scrapper::gfourmedia::G4Media;
-use crate::scrapper::{NewsPost, WebScrapperEngine};
+use crate::scrapper::WebScrapperEngine;
 use clap::Parser;
 use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use log::{debug, error, info};
+use post::NewsPost;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc};
@@ -12,7 +13,7 @@ use std::time::Duration;
 use tokio::task::JoinHandle;
 
 mod cli;
-mod redis;
+mod redis_service;
 mod scrapper;
 
 /// Runs the scheduler in a separated thread.

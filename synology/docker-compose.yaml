@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   scraper:
+    container_name: g4media-scraper
     image: metonymy/scrapper
     environment:
       RUST_LOG: info

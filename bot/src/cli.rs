@@ -10,4 +10,12 @@ pub struct CliArgs {
     /// Redis stream name
     #[arg(short = 't', long)]
     pub redis_stream_name: String,
+
+    /// Redis consumer group name
+    #[arg(short = 'c', long)]
+    pub redis_consumer_group: String,
+
+    /// The current consumer name
+    #[arg(short = 'n', long)]
+    pub redis_consumer_name: String,
 }

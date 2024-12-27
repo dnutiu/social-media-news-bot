@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// NewsPost represents a news post.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialOrd, PartialEq)]
 pub struct NewsPost {
     /// A URL containing the image of the post.
     pub image: Option<String>,

@@ -1,6 +1,8 @@
 use crate::cli::CliArgs;
 use clap::Parser;
-use log::{error, info};
+use infrastructure::RedisService;
+use log::{error, info, warn};
+use post::NewsPost;
 use signal_hook::consts::{SIGINT, SIGTERM};
 use signal_hook::iterator::Signals;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -11,7 +13,7 @@ mod cli;
 
 //noinspection DuplicatedCode
 /// Sets up a signal handler in a separate thread to handle SIGINT and SIGTERM signals.
-fn setup_graceful_shutdown(running: Arc<AtomicBool>) {
+fn setup_graceful_shutdown(running: &Arc<AtomicBool>) {
     let r = running.clone();
     thread::spawn(move || {
         let signals = Signals::new([SIGINT, SIGTERM]);
@@ -36,7 +38,40 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // Graceful shutdown.
     let running = Arc::new(AtomicBool::new(true));
-    setup_graceful_shutdown(running);
+    setup_graceful_shutdown(&running);
 
+    // Redis setup
+    let mut redis_service = RedisService::new(&args.redis_connection_string).await;
+
+    // Create consumer group for stream.
+    let result = redis_service
+        .create_group(&args.redis_stream_name, &args.redis_consumer_group, 0)
+        .await;
+    if let Err(err) = result {
+        warn!("{}", err);
+    }
+
+    // Read from stream
+    while running.load(Ordering::SeqCst) {
+        match redis_service
+            .read_stream::<NewsPost>(
+                &args.redis_stream_name,
+                &args.redis_consumer_group,
+                &args.redis_consumer_name,
+                5000,
+            )
+            .await
+        {
+            Ok(data) => {
+                // TODO: Implement
+                dbg!(data);
+            }
+            Err(err) => {
+                error!("error reading stream: {err}")
+            }
+        }
+    }
+
+    info!("Stopping the program");
     Ok(())
 }

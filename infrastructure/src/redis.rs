@@ -1,7 +1,10 @@
+use anyhow::anyhow;
 use log::error;
 use redis::aio::MultiplexedConnection;
-use redis::{AsyncCommands, RedisError};
-use serde::Serialize;
+use redis::streams::StreamReadReply;
+use redis::Value::BulkString;
+use redis::{AsyncCommands, RedisError, RedisResult};
+use serde::{Deserialize, Serialize};
 
 pub struct RedisService {
     multiplexed_connection: MultiplexedConnection,
@@ -52,6 +55,85 @@ impl RedisService {
             return false;
         };
         true
+    }
+
+    /// Creates a group for the given stream that consumes from the specified starting id.
+    pub async fn create_group(
+        &mut self,
+        stream_name: &str,
+        group_name: &str,
+        starting_id: u32,
+    ) -> Result<(), anyhow::Error> {
+        redis::cmd("XGROUP")
+            .arg("CREATE")
+            .arg(stream_name)
+            .arg(group_name)
+            .arg(starting_id)
+            .exec_async(&mut self.multiplexed_connection)
+            .await
+            .map_err(|e| {
+                anyhow!("failed to create group {group_name} for stream {stream_name}: {e}")
+            })
+    }
+
+    /// Reads a stream from Redis and in a blocking fashion.
+    ///
+    /// Messages are acknowledged automatically when read.
+    ///
+    /// stream_name - is the name of the stream
+    /// consumer_group - is the name of the consumer group
+    /// consumer_name - is the name of the current consumer
+    /// block_timeout - is the timeout in milliseconds to block for messages.
+    pub async fn read_stream<T>(
+        &mut self,
+        stream_name: &str,
+        consumer_group: &str,
+        consumer_name: &str,
+        block_timeout: u32,
+    ) -> Result<T, anyhow::Error>
+    where
+        T: for<'a> Deserialize<'a>,
+    {
+        let result: RedisResult<StreamReadReply> = redis::cmd("XREADGROUP")
+            .arg("GROUP")
+            .arg(consumer_group)
+            .arg(consumer_name)
+            .arg("BLOCK")
+            .arg(block_timeout)
+            .arg("COUNT")
+            .arg(1)
+            .arg("NOACK")
+            .arg("STREAMS")
+            .arg(stream_name)
+            .arg(">")
+            .query_async(&mut self.multiplexed_connection)
+            .await;
+
+        match result {
+            Ok(data) => {
+                if data.keys.is_empty() {
+                    return Err(anyhow!("read stream entry with empty keys"));
+                }
+                if data.keys[0].ids.is_empty() {
+                    return Err(anyhow!("read stream entry with empty ids"));
+                }
+                let stream = data.keys[0].ids[0].map.get("data");
+                if let Some(BulkString(data)) = stream {
+                    let string_data = std::str::from_utf8(data);
+                    return match string_data {
+                        Ok(string_data) => {
+                            let deserialized_data: T = serde_json::from_str(string_data)?;
+                            Ok(deserialized_data)
+                        }
+                        Err(err) => Err(anyhow!("can't convert data to string: {err}")),
+                    };
+                }
+                Err(anyhow!(
+                    "invalid type read from streams, expected BulkString"
+                ))
+            }
+            Err(err) => Err(err.into()),
+        }
     }
 }
 
@@ -139,5 +221,41 @@ mod tests {
         assert_eq!(result, true);
         assert_eq!(stream_length, Ok(1));
         cleanup(&mut service).await;
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_redis_service_read() -> Result<(), anyhow::Error> {
+        // Setup
+        let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
+
+        let mut service = RedisService::new(REDIS_CONNECTION_STRING).await;
+        let post = NewsPost {
+            image: Some(String::from("i")),
+            title: Some(String::from("t")),
+            summary: Some(String::from("s")),
+            link: Some(String::from("l")),
+            author: Some(String::from("a")),
+        };
+        let _ = service.publish(&random_stream_name, &post).await;
+
+        // Test
+        service
+            .create_group(&random_stream_name, &random_stream_name, 0)
+            .await?;
+        let result = service
+            .read_stream::<NewsPost>(
+                &random_stream_name,
+                &random_stream_name,
+                &random_stream_name,
+                10_000,
+            )
+            .await?;
+
+        assert_eq!(result, post);
+
+        // Assert
+        cleanup(&mut service).await;
+        Ok(())
     }
 }

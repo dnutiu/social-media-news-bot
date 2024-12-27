@@ -121,10 +121,7 @@ impl RedisService {
                 if let Some(BulkString(data)) = stream {
                     let string_data = std::str::from_utf8(data);
                     return match string_data {
-                        Ok(string_data) => {
-                            let deserialized_data: T = serde_json::from_str(string_data)?;
-                            Ok(deserialized_data)
-                        }
+                        Ok(string_data) => Ok(serde_json::from_str(string_data)?),
                         Err(err) => Err(anyhow!("can't convert data to string: {err}")),
                     };
                 }
@@ -252,9 +249,8 @@ mod tests {
             )
             .await?;
 
-        assert_eq!(result, post);
-
         // Assert
+        assert_eq!(result, post);
         cleanup(&mut service).await;
         Ok(())
     }

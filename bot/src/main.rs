@@ -9,6 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
+mod bluesky;
 mod cli;
 
 //noinspection DuplicatedCode

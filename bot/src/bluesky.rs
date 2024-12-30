@@ -1,8 +1,9 @@
-mod atproto;
+pub(crate) mod atproto;
+mod token;
 
 use crate::bluesky::atproto::ATProtoServerCreateSession;
-use crate::token::Token;
 use reqwest::Body;
+use token::Token;
 
 /// The BlueSky client used to interact with the platform.
 pub struct BlueSkyClient {

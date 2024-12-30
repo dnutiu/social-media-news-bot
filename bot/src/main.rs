@@ -12,7 +12,6 @@ use std::thread;
 
 mod bluesky;
 mod cli;
-mod token;
 
 //noinspection DuplicatedCode
 /// Sets up a signal handler in a separate thread to handle SIGINT and SIGTERM signals.
@@ -69,9 +68,18 @@ async fn main() -> Result<(), anyhow::Error> {
             .await
         {
             Ok(post) => {
-                let data = ""; // TODO
-                if let Err(err) = bluesky_client.post(data).await {
-                    error!("failed to post: {post:?} {err}")
+                let mut data: bluesky::atproto::ATProtoRepoCreateRecord = post.clone().into();
+                data.repo = args.bluesky_handle.clone();
+                let json = serde_json::to_string(&data);
+                match json {
+                    Ok(json) => {
+                        if let Err(err) = bluesky_client.post(json).await {
+                            error!("failed to post: {post:?} {err}")
+                        }
+                    }
+                    Err(err) => {
+                        error!("failed to convert post to json: {post:?} {err}")
+                    }
                 }
             }
             Err(err) => {

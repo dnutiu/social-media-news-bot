@@ -2,6 +2,41 @@ use chrono::{DateTime, Local, Utc};
 use post::NewsPost;
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Debug)]
+struct BlobLinkRef {
+    #[serde(rename = "$link")]
+    pub _link: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Blob {
+    #[serde(rename = "$type")]
+    pub _type: String,
+    #[serde(rename = "ref")]
+    pub r#ref: BlobLinkRef,
+    #[serde(rename = "mimeType")]
+    pub mime_type: String,
+    pub size: i64,
+}
+
+impl Blob {
+    pub fn new(link: &str, mime_type: &str, size: i64) -> Self {
+        Blob {
+            _type: "blob".to_string(),
+            r#ref: BlobLinkRef {
+                _link: link.to_string(),
+            },
+            mime_type: mime_type.to_string(),
+            size,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct BlobResponse {
+    pub blob: Blob,
+}
+
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ATProtoServerCreateSession {
     pub(crate) identifier: String,
@@ -13,6 +48,8 @@ pub struct ExternalRecordEmbed {
     uri: String,
     title: String,
     description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    thumb: Option<Blob>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -23,13 +60,14 @@ pub struct ATprotoRepoCreateRecordEmbed {
 }
 
 impl ATprotoRepoCreateRecordEmbed {
-    fn new(uri: &str, title: &str, description: &str) -> Self {
+    fn new(uri: &str, title: &str, description: &str, thumb: Option<Blob>) -> Self {
         ATprotoRepoCreateRecordEmbed {
             embed_type: "app.bsky.embed.external".to_string(),
             external: ExternalRecordEmbed {
                 uri: uri.to_string(),
                 title: title.to_string(),
                 description: description.to_string(),
+                thumb,
             },
         }
     }
@@ -84,6 +122,7 @@ impl From<NewsPost> for ATProtoRepoCreateRecord {
                     post.link.unwrap().as_str(),
                     post.title.unwrap().as_str(),
                     post.summary.unwrap().as_str(),
+                    None,
                 )),
             ),
         )
@@ -148,6 +187,7 @@ mod tests {
                     "https://some-news.ro/some",
                     "Some very important news",
                     "The description of the news",
+                    None,
                 )),
             ),
         );
@@ -157,6 +197,40 @@ mod tests {
         assert_eq!(
             json,
             r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news"}}}}"#
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_atproto_repo_create_record_record_embed_and_thumb_serialization(
+    ) -> Result<(), anyhow::Error> {
+        let time_str = "2024-12-30T13:45:00";
+        let naive_datetime = NaiveDateTime::parse_from_str(time_str, "%Y-%m-%dT%H:%M:%S").unwrap();
+
+        let session = ATProtoRepoCreateRecord::new(
+            "nuculabs.dev",
+            ATprotoRepoCreateRecordRecord::new(
+                "some post",
+                DateTime::from_naive_utc_and_offset(naive_datetime, Utc),
+                Some(ATprotoRepoCreateRecordEmbed::new(
+                    "https://some-news.ro/some",
+                    "Some very important news",
+                    "The description of the news",
+                    Some(Blob::new(
+                        "bafkreiass5vjx467rdtm77ey4kkuz667wldaffq7z3nmvqxm2bwk3hiemm",
+                        "image/jpeg",
+                        122,
+                    )),
+                )),
+            ),
+        );
+
+        let json = serde_json::to_string(&session)?;
+
+        assert_eq!(
+            json,
+            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news","thumb":{"$type":"blob","ref":{"$link":"bafkreiass5vjx467rdtm77ey4kkuz667wldaffq7z3nmvqxm2bwk3hiemm"},"mimeType":"image/jpeg","size":122}}}}}"#
         );
 
         Ok(())

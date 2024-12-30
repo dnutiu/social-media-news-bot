@@ -20,7 +20,7 @@ pub struct CliArgs {
     pub redis_consumer_name: String,
 
     /// The bluesky bot user's handle.
-    #[arg(short = 'h', long)]
+    #[arg(short = 'u', long)]
     pub bluesky_handle: String,
 
     /// The bluesky bot user's password.

@@ -2,6 +2,8 @@ pub(crate) mod atproto;
 mod token;
 
 use crate::bluesky::atproto::ATProtoServerCreateSession;
+use anyhow::anyhow;
+use log::warn;
 use reqwest::Body;
 use token::Token;
 
@@ -42,16 +44,22 @@ impl BlueSkyClient {
         if token_expired {
             self.renew_token().await?;
         }
-        self.client
+        let response_code = self
+            .client
             .post("https://bsky.social/xrpc/com.atproto.repo.createRecord")
             .header("Content-Type", "application/json")
             .header(
                 "Authorization",
-                format!("Bearer, {}", self.auth_token.access_jwt),
+                format!("Bearer {}", self.auth_token.access_jwt),
             )
             .body(body)
             .send()
-            .await?;
+            .await?
+            .status();
+
+        if response_code != 200 {
+            return Err(anyhow!("Failed to post on BlueSky, got {response_code}"));
+        }
         Ok(())
     }
 
@@ -62,7 +70,7 @@ impl BlueSkyClient {
             .header("Content-Type", "application/json")
             .header(
                 "Authorization",
-                format!("Bearer, {}", self.auth_token.refresh_jwt),
+                format!("Bearer {}", self.auth_token.refresh_jwt),
             )
             .send()
             .await?

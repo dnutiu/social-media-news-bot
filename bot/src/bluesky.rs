@@ -1,8 +1,10 @@
 pub(crate) mod atproto;
 mod token;
 
-use crate::bluesky::atproto::ATProtoServerCreateSession;
+use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
 use anyhow::anyhow;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine;
 use reqwest::Body;
 use token::Token;
 
@@ -13,6 +15,7 @@ pub struct BlueSkyClient {
 }
 
 impl BlueSkyClient {
+    /// Creates a new BlueSky client instance for the given account credentials.
     pub async fn new(user_handle: &str, user_password: &str) -> Result<Self, anyhow::Error> {
         let client = reqwest::Client::new();
         let server_create_session = ATProtoServerCreateSession {
@@ -35,6 +38,7 @@ impl BlueSkyClient {
         })
     }
 
+    /// Makes a new tweet.
     pub async fn post<T>(&mut self, body: T) -> Result<(), anyhow::Error>
     where
         T: Into<Body>,
@@ -62,6 +66,7 @@ impl BlueSkyClient {
         Ok(())
     }
 
+    /// Renews the Authentication JWT bearer token using the refresh token.
     async fn renew_token(&mut self) -> Result<(), anyhow::Error> {
         let result: Token = self
             .client
@@ -77,5 +82,23 @@ impl BlueSkyClient {
             .await?;
         self.auth_token = result;
         Ok(())
+    }
+
+    /// Uploads an image.
+    async fn upload_image(&mut self, payload: Vec<u8>) -> Result<BlobResponse, anyhow::Error> {
+        let base64_data = BASE64_STANDARD.encode(payload);
+        Ok(self
+            .client
+            .post("https://bsky.social/xrpc/com.atproto.repo.uploadBlob")
+            .header("Content-Type", "image/png")
+            .header(
+                "Authorization",
+                format!("Bearer {}", self.auth_token.access_jwt),
+            )
+            .body(base64_data)
+            .send()
+            .await?
+            .json()
+            .await?)
     }
 }

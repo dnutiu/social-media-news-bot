@@ -3,13 +3,13 @@ use post::NewsPost;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct BlobLinkRef {
+pub struct BlobLinkRef {
     #[serde(rename = "$link")]
     pub _link: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Blob {
+pub struct Blob {
     #[serde(rename = "$type")]
     pub _type: String,
     #[serde(rename = "ref")]
@@ -33,7 +33,7 @@ impl Blob {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct BlobResponse {
+pub struct BlobResponse {
     pub blob: Blob,
 }
 

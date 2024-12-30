@@ -45,18 +45,18 @@ pub struct ATProtoServerCreateSession {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ExternalRecordEmbed {
-    uri: String,
-    title: String,
-    description: String,
+    pub uri: String,
+    pub title: String,
+    pub description: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    thumb: Option<Blob>,
+    pub thumb: Option<Blob>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ATprotoRepoCreateRecordEmbed {
     #[serde(rename(serialize = "$type", deserialize = "$type"))]
-    embed_type: String,
-    external: ExternalRecordEmbed,
+    pub embed_type: String,
+    pub external: ExternalRecordEmbed,
 }
 
 impl ATprotoRepoCreateRecordEmbed {
@@ -75,11 +75,11 @@ impl ATprotoRepoCreateRecordEmbed {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ATprotoRepoCreateRecordRecord {
-    text: String,
+    pub text: String,
     #[serde(rename(serialize = "createdAt", deserialize = "createdAt"))]
-    created_at: String,
+    pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    embed: Option<ATprotoRepoCreateRecordEmbed>,
+    pub embed: Option<ATprotoRepoCreateRecordEmbed>,
 }
 
 impl ATprotoRepoCreateRecordRecord {
@@ -94,8 +94,8 @@ impl ATprotoRepoCreateRecordRecord {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ATProtoRepoCreateRecord {
     pub repo: String,
-    collection: String,
-    record: ATprotoRepoCreateRecordRecord,
+    pub collection: String,
+    pub record: ATprotoRepoCreateRecordRecord,
 }
 
 impl ATProtoRepoCreateRecord {

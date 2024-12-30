@@ -21,6 +21,7 @@ impl BlueSkyClient {
         let body = serde_json::to_string(&server_create_session)?;
         let token: Token = client
             .post("https://bsky.social/xrpc/com.atproto.server.createSession")
+            .header("Content-Type", "application/json")
             .body(body)
             .send()
             .await?
@@ -43,6 +44,7 @@ impl BlueSkyClient {
         }
         self.client
             .post("https://bsky.social/xrpc/com.atproto.repo.createRecord")
+            .header("Content-Type", "application/json")
             .header(
                 "Authorization",
                 format!("Bearer, {}", self.auth_token.access_jwt),
@@ -57,6 +59,7 @@ impl BlueSkyClient {
         let result: Token = self
             .client
             .post("https://bsky.social/xrpc/com.atproto.server.refreshSession")
+            .header("Content-Type", "application/json")
             .header(
                 "Authorization",
                 format!("Bearer, {}", self.auth_token.refresh_jwt),

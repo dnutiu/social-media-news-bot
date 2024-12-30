@@ -3,7 +3,6 @@ mod token;
 
 use crate::bluesky::atproto::ATProtoServerCreateSession;
 use anyhow::anyhow;
-use log::warn;
 use reqwest::Body;
 use token::Token;
 

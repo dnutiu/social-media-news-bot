@@ -20,7 +20,7 @@ impl BlueSkyClient {
         };
         let body = serde_json::to_string(&server_create_session)?;
         let token: Token = client
-            .post("https://bsky.social/xrpc/com.atproto.repo.createRecord")
+            .post("https://bsky.social/xrpc/com.atproto.server.createSession")
             .body(body)
             .send()
             .await?

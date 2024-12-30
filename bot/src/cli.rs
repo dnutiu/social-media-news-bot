@@ -25,5 +25,5 @@ pub struct CliArgs {
 
     /// The bluesky bot user's password.
     #[arg(short = 'p', long)]
-    pub bluesky_password: String
+    pub bluesky_password: String,
 }

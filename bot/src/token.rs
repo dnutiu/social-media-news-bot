@@ -14,18 +14,18 @@ struct TokenPayloadInternal {
 }
 
 /// Token represents a bluesky authentication token.
-#[derive(Serialize, Deserialize, Debug, PartialOrd, PartialEq, Default)]
-struct Token {
-    handle: String,
+#[derive(Serialize, Deserialize, Debug, PartialOrd, PartialEq)]
+pub(crate) struct Token {
+    pub handle: String,
     #[serde(rename(serialize = "accessJwt", deserialize = "accessJwt"))]
-    access_jwt: String,
+    pub access_jwt: String,
     #[serde(rename(serialize = "refreshJwt", deserialize = "refreshJwt"))]
-    refresh_jwt: String,
+    pub refresh_jwt: String,
 }
 
 impl Token {
     /// Returns true if the token is expired, false otherwise.
-    fn is_expired(&self) -> Result<bool, anyhow::Error> {
+    pub fn is_expired(&self) -> Result<bool, anyhow::Error> {
         let parts: Vec<&str> = self.access_jwt.split('.').collect();
         let payload_part = parts.get(1).ok_or(anyhow!("Missing payload from token"))?;
 
@@ -66,7 +66,11 @@ mod tests {
         let json_data = serde_json::to_string(&payload)?;
         let base64_data = BASE64_STANDARD_NO_PAD.encode(json_data);
 
-        let mut token = Token::default();
+        let mut token = Token {
+            handle: "".to_string(),
+            access_jwt: "".to_string(),
+            refresh_jwt: "".to_string(),
+        };
         token.access_jwt = format!("eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksifQ.{}.oWhKfhGWv6omS3oFQ21GX29uzsd5WrfPJyotJMCQ8V44GF1UN2et7sf_JKVB5jkSuJa6kVWERGuKVGgj8AWScA", base64_data);
 
         // Test
@@ -91,7 +95,11 @@ mod tests {
         let json_data = serde_json::to_string(&payload)?;
         let base64_data = BASE64_STANDARD_NO_PAD.encode(json_data);
 
-        let mut token = Token::default();
+        let mut token = Token {
+            handle: "".to_string(),
+            access_jwt: "".to_string(),
+            refresh_jwt: "".to_string(),
+        };
         token.access_jwt = format!("eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksifQ.{}.oWhKfhGWv6omS3oFQ21GX29uzsd5WrfPJyotJMCQ8V44GF1UN2et7sf_JKVB5jkSuJa6kVWERGuKVGgj8AWScA", base64_data);
 
         // Test

@@ -1,3 +1,4 @@
+use crate::bluesky::BlueSkyClient;
 use crate::cli::CliArgs;
 use clap::Parser;
 use infrastructure::RedisService;
@@ -53,6 +54,9 @@ async fn main() -> Result<(), anyhow::Error> {
         warn!("{}", err);
     }
 
+    let mut bluesky_client =
+        BlueSkyClient::new(&args.bluesky_handle, &args.bluesky_password).await?;
+
     // Read from stream
     while running.load(Ordering::SeqCst) {
         match redis_service
@@ -64,9 +68,11 @@ async fn main() -> Result<(), anyhow::Error> {
             )
             .await
         {
-            Ok(data) => {
-                // TODO: Implement
-                dbg!(data);
+            Ok(post) => {
+                let data = ""; // TODO
+                if let Err(err) = bluesky_client.post(data).await {
+                    error!("failed to post: {post:?} {err}")
+                }
             }
             Err(err) => {
                 error!("error reading stream: {err}")

@@ -1,9 +1,13 @@
 # BlueSky Bot
 
-A simple project that scrapes websites and publishes tweets on [BlueSky](https://bsky.app/).
+A simple Bot that scrapes websites and publishes tweets on [BlueSky](https://bsky.app/).
 
-**⚠️ Work In Progress ⚠️**
+It's built with [Rust](https://www.rust-lang.org/) and [Redis](https://redis.io/) and can be extended to include 
+LLM support for content summarization, suggestions and other features.
 
+Demo:
+
+![demo](./docs/demo.jpg)
 
 ## Architecture
 

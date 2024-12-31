@@ -95,6 +95,8 @@ async fn main() -> Result<(), anyhow::Error> {
                     Ok(json) => {
                         if let Err(err) = bluesky_client.post(json).await {
                             error!("failed to post: {post:?} {err}")
+                        } else {
+                            info!("Published a post! 🦀")
                         }
                     }
                     Err(err) => {

@@ -20,6 +20,7 @@ pub struct Blob {
 }
 
 impl Blob {
+    #![allow(dead_code)]
     pub fn new(link: &str, mime_type: &str, size: i64) -> Self {
         Blob {
             _type: "blob".to_string(),
@@ -231,6 +232,20 @@ mod tests {
         assert_eq!(
             json,
             r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news","thumb":{"$type":"blob","ref":{"$link":"bafkreiass5vjx467rdtm77ey4kkuz667wldaffq7z3nmvqxm2bwk3hiemm"},"mimeType":"image/jpeg","size":122}}}}}"#
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_blob_new_serialization() -> Result<(), anyhow::Error> {
+        let blob = Blob::new("asa", "image/jpeg", 1);
+
+        let json = serde_json::to_string(&blob)?;
+
+        assert_eq!(
+            json,
+            r#"{"$type":"blob","ref":{"$link":"asa"},"mimeType":"image/jpeg","size":1}"#
         );
 
         Ok(())

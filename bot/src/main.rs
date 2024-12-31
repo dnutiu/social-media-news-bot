@@ -32,6 +32,18 @@ fn setup_graceful_shutdown(running: &Arc<AtomicBool>) {
     });
 }
 
+/// Embeds an image to a post.
+async fn add_image_to_post(
+    client: &mut BlueSkyClient,
+    image_url: &str,
+    record: &mut bluesky::atproto::ATProtoRepoCreateRecord,
+) -> Result<(), anyhow::Error> {
+    let thumb = client.upload_image_by_url(image_url).await?;
+    record.record.embed.as_mut().unwrap().external.thumb = Some(thumb.blob);
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
@@ -70,6 +82,14 @@ async fn main() -> Result<(), anyhow::Error> {
             Ok(post) => {
                 let mut data: bluesky::atproto::ATProtoRepoCreateRecord = post.clone().into();
                 data.repo = args.bluesky_handle.clone();
+
+                if let Some(image_link) = post.image.clone() {
+                    let result =
+                        add_image_to_post(&mut bluesky_client, &image_link, &mut data).await;
+                    if let Err(err) = result {
+                        warn!("Failed to upload image: {err}")
+                    }
+                }
                 let json = serde_json::to_string(&data);
                 match json {
                     Ok(json) => {

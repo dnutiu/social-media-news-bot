@@ -3,9 +3,9 @@ mod token;
 
 use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
 use anyhow::anyhow;
-use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use reqwest::Body;
+use std::io::Write;
 use token::Token;
 
 /// The BlueSky client used to interact with the platform.
@@ -85,17 +85,28 @@ impl BlueSkyClient {
     }
 
     /// Uploads an image.
-    async fn upload_image(&mut self, payload: Vec<u8>) -> Result<BlobResponse, anyhow::Error> {
-        let base64_data = BASE64_STANDARD.encode(payload);
+    pub async fn upload_image_by_url(
+        &mut self,
+        image_url: &str,
+    ) -> Result<BlobResponse, anyhow::Error> {
+        let data: Vec<u8> = self
+            .client
+            .get(image_url)
+            .send()
+            .await?
+            .bytes()
+            .await?
+            .to_vec();
+
         Ok(self
             .client
             .post("https://bsky.social/xrpc/com.atproto.repo.uploadBlob")
-            .header("Content-Type", "image/png")
+            .header("Content-Type", "image/jpeg")
             .header(
                 "Authorization",
                 format!("Bearer {}", self.auth_token.access_jwt),
             )
-            .body(base64_data)
+            .body(data)
             .send()
             .await?
             .json()

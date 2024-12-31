@@ -3,9 +3,7 @@ mod token;
 
 use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
 use anyhow::anyhow;
-use base64::Engine;
 use reqwest::Body;
-use std::io::Write;
 use token::Token;
 
 /// The BlueSky client used to interact with the platform.

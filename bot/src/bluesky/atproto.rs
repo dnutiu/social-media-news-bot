@@ -79,6 +79,8 @@ pub struct ATprotoRepoCreateRecordRecord {
     pub text: String,
     #[serde(rename(serialize = "createdAt", deserialize = "createdAt"))]
     pub created_at: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub langs: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub embed: Option<ATprotoRepoCreateRecordEmbed>,
 }
@@ -88,6 +90,7 @@ impl ATprotoRepoCreateRecordRecord {
         ATprotoRepoCreateRecordRecord {
             text: text.to_string(),
             created_at: date.to_rfc3339(),
+            langs: vec![String::from("ro-RO")],
             embed,
         }
     }
@@ -173,7 +176,7 @@ mod tests {
 
         assert_eq!(
             json,
-            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00"}}"#
+            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","langs":["ro-RO"]}}"#
         );
 
         Ok(())
@@ -202,7 +205,7 @@ mod tests {
 
         assert_eq!(
             json,
-            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news"}}}}"#
+            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","langs":["ro-RO"],"embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news"}}}}"#
         );
 
         Ok(())
@@ -236,7 +239,7 @@ mod tests {
 
         assert_eq!(
             json,
-            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news","thumb":{"$type":"blob","ref":{"$link":"bafkreiass5vjx467rdtm77ey4kkuz667wldaffq7z3nmvqxm2bwk3hiemm"},"mimeType":"image/jpeg","size":122}}}}}"#
+            r#"{"repo":"nuculabs.dev","collection":"app.bsky.feed.post","record":{"text":"some post","createdAt":"2024-12-30T13:45:00+00:00","langs":["ro-RO"],"embed":{"$type":"app.bsky.embed.external","external":{"uri":"https://some-news.ro/some","title":"Some very important news","description":"The description of the news","thumb":{"$type":"blob","ref":{"$link":"bafkreiass5vjx467rdtm77ey4kkuz667wldaffq7z3nmvqxm2bwk3hiemm"},"mimeType":"image/jpeg","size":122}}}}}"#
         );
 
         Ok(())

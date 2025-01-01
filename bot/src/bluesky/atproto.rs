@@ -122,7 +122,12 @@ impl From<NewsPost> for ATProtoRepoCreateRecord {
                 Some(ATprotoRepoCreateRecordEmbed::new(
                     post.link.unwrap().as_str(),
                     post.title.unwrap().as_str(),
-                    post.summary.unwrap().as_str(),
+                    post.summary
+                        .clone()
+                        .unwrap()
+                        .as_str()
+                        .get(0..=300)
+                        .unwrap_or(post.summary.unwrap().as_str()),
                     None,
                 )),
             ),

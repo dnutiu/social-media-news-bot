@@ -1,7 +1,19 @@
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
+
+/// Bluesky Command Arguments
+#[derive(Args, Debug)]
+pub struct BlueskyCommand {
+    /// The Bluesky bot user's handle.
+    #[arg(short = 'u', long)]
+    pub bluesky_handle: String,
+
+    /// The Bluesky bot user's password.
+    #[arg(short = 'p', long)]
+    pub bluesky_password: String,
+}
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about = "Social media posting bot.", long_about = None)]
 pub struct CliArgs {
     /// Redis host
     #[arg(short, long)]
@@ -19,11 +31,16 @@ pub struct CliArgs {
     #[arg(short = 'n', long)]
     pub redis_consumer_name: String,
 
-    /// The bluesky bot user's handle.
-    #[arg(short = 'u', long)]
-    pub bluesky_handle: String,
+    /// Platform
+    #[command(subcommand)]
+    pub platform: Command,
+}
 
-    /// The bluesky bot user's password.
-    #[arg(short = 'p', long)]
-    pub bluesky_password: String,
+/// Available Subcommands
+#[derive(Subcommand, Debug)]
+pub enum Command {
+    /// Post on bluesky platform.
+    Bluesky(BlueskyCommand),
+    /// Post on Mastodon, the FediVerse
+    Mastodon,
 }

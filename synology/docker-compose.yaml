@@ -10,7 +10,7 @@ services:
       - "redis://192.168.0.221:6379"
       - "--redis-stream-name"
       - "posts::g4media"
-  bot:
+  bluesky-bot:
     container_name: bluesky-bot
     image: metonymy/bot
     environment:
@@ -24,6 +24,7 @@ services:
       - "bluesky-bot-nas"
       - "--redis-consumer-name"
       - "bot-1"
+      - "bluesky"
       - "--bluesky-handle"
       - "REPLACE-ME"
       - "--bluesky-password"

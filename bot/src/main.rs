@@ -1,5 +1,5 @@
 use crate::bluesky::BlueSkyClient;
-use crate::cli::CliArgs;
+use crate::cli::{CliArgs, Command};
 use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};
@@ -65,48 +65,57 @@ async fn main() -> Result<(), anyhow::Error> {
         warn!("{}", err);
     }
 
-    let mut bluesky_client =
-        BlueSkyClient::new(&args.bluesky_handle, &args.bluesky_password).await?;
+    match args.platform {
+        Command::Bluesky(bluesky) => {
+            let mut bluesky_client =
+                BlueSkyClient::new(&bluesky.bluesky_handle, &bluesky.bluesky_password).await?;
 
-    // Read from stream
-    while running.load(Ordering::SeqCst) {
-        match redis_service
-            .read_stream::<NewsPost>(
-                &args.redis_stream_name,
-                &args.redis_consumer_group,
-                &args.redis_consumer_name,
-                5000,
-            )
-            .await
-        {
-            Ok(post) => {
-                let mut data: bluesky::atproto::ATProtoRepoCreateRecord = post.clone().into();
-                data.repo = args.bluesky_handle.clone();
+            // Read from stream
+            while running.load(Ordering::SeqCst) {
+                match redis_service
+                    .read_stream::<NewsPost>(
+                        &args.redis_stream_name,
+                        &args.redis_consumer_group,
+                        &args.redis_consumer_name,
+                        5000,
+                    )
+                    .await
+                {
+                    Ok(post) => {
+                        let mut data: bluesky::atproto::ATProtoRepoCreateRecord =
+                            post.clone().into();
+                        data.repo = bluesky.bluesky_handle.clone();
 
-                if let Some(image_link) = post.image.clone() {
-                    let result =
-                        add_image_to_post(&mut bluesky_client, &image_link, &mut data).await;
-                    if let Err(err) = result {
-                        warn!("Failed to upload image: {err}")
-                    }
-                }
-                let json = serde_json::to_string(&data);
-                match json {
-                    Ok(json) => {
-                        if let Err(err) = bluesky_client.post(json).await {
-                            error!("failed to post: {post:?} {err}")
-                        } else {
-                            info!("Published a post! 🦀")
+                        if let Some(image_link) = post.image.clone() {
+                            let result =
+                                add_image_to_post(&mut bluesky_client, &image_link, &mut data)
+                                    .await;
+                            if let Err(err) = result {
+                                warn!("Failed to upload image: {err}")
+                            }
+                        }
+                        let json = serde_json::to_string(&data);
+                        match json {
+                            Ok(json) => {
+                                if let Err(err) = bluesky_client.post(json).await {
+                                    error!("failed to post: {post:?} {err}")
+                                } else {
+                                    info!("Published a post! 🦀")
+                                }
+                            }
+                            Err(err) => {
+                                error!("failed to convert post to json: {post:?} {err}")
+                            }
                         }
                     }
                     Err(err) => {
-                        error!("failed to convert post to json: {post:?} {err}")
+                        error!("error reading stream: {err}")
                     }
                 }
             }
-            Err(err) => {
-                error!("error reading stream: {err}")
-            }
+        }
+        Command::Mastodon => {
+            unimplemented!("This command is not currently implemented.")
         }
     }
 

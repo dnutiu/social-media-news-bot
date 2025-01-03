@@ -23,8 +23,10 @@ COPY . .
 RUN cargo build --profile release
 
 # Run the project
-FROM rust:1.83.0-bookworm AS runner
+FROM debian:bookworm-slim AS runner
 WORKDIR /app
+
+RUN apt-get update && apt-get -y install libssl3
 
 COPY --from=builder /app/target/release/scrapper /app/scrapper
 

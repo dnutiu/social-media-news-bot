@@ -12,6 +12,7 @@ use std::thread;
 
 mod bluesky;
 mod cli;
+mod mastodon;
 
 //noinspection DuplicatedCode
 /// Sets up a signal handler in a separate thread to handle SIGINT and SIGTERM signals.

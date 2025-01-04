@@ -1,13 +1,17 @@
-# BlueSky Bot
+# Social Media News Bot
 
-A simple Bot that scrapes websites and publishes tweets on [BlueSky](https://bsky.app/).
+A simple Bot that scrapes websites and publishes tweets on [BlueSky](https://bsky.app/) and [Mastodon](https://joinmastodon.org).
 
 It's built with [Rust](https://www.rust-lang.org/) and [Redis](https://redis.io/) and can be extended to include 
 LLM support for content summarization, suggestions and other features.
 
 Demo:
 
-![demo](./docs/demo.jpg)
+![demo bluesky](./docs/demo_bluesky.jpg)
+
+---
+
+![demo mastodon](./docs/demo_mastodon.png)
 
 ## Architecture
 

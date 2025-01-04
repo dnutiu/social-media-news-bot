@@ -26,7 +26,7 @@ RUN cargo build --profile release
 FROM debian:bookworm-slim AS runner
 WORKDIR /app
 
-RUN apt-get update && apt-get -y install libssl3
+RUN apt-get update && apt-get -y install libssl3 && apt-get -y install ca-certificates
 
 COPY --from=builder /app/target/release/bot /app/bot
 

@@ -26,24 +26,24 @@ impl From<NewsPost> for PostStatusRequest {
         let mut status = String::new();
 
         // The character budget for mastodon.social.
-        let mut character_budget = 500;
+        let mut character_budget: i32 = 500;
         let title = value.title.unwrap();
         let summary = value.summary.unwrap();
         let link = value.link.unwrap();
 
         // reserve space for the link + one space
-        character_budget -= link.len() + 2;
+        character_budget -= link.len() as i32 + 2;
 
         // Push the title
         if character_budget > 0 {
-            status.push_str(title.get(0..character_budget).unwrap_or(title.as_str()));
-            character_budget -= title.len() + 2;
+            status.push_str(title.get(0..character_budget as usize).unwrap_or(title.as_str()));
+            character_budget -= title.len() as i32 + 2;
             status.push('\n')
         }
 
         // Push the summary
         if character_budget > 0 {
-            status.push_str(summary.get(0..character_budget).unwrap_or(summary.as_str()));
+            status.push_str(summary.get(0..character_budget as usize).unwrap_or(summary.as_str()));
             status.push('\n')
         }
 

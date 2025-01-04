@@ -2,7 +2,7 @@ use crate::bluesky::BlueSkyClient;
 use crate::cli::{CliArgs, Command};
 use crate::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
 use crate::mastodon::MastodonClient;
-use anyhow::{anyhow, Error};
+use anyhow::{anyhow};
 use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};

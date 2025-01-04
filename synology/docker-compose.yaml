@@ -40,7 +40,7 @@ services:
       - "--redis-stream-name"
       - "posts::g4media"
       - "--redis-consumer-group"
-      - "bluesky-bot-nas"
+      - "mastodon-bot-nas"
       - "--redis-consumer-name"
       - "mastodon-bot-1"
       - "bluesky"

@@ -23,7 +23,40 @@ pub struct PostStatusRequest {
 
 impl From<NewsPost> for PostStatusRequest {
     fn from(value: NewsPost) -> Self {
-        todo!()
+        let mut status = String::new();
+
+        // The character budget for mastodon.social.
+        let mut character_budget = 500;
+        let title = value.title.unwrap();
+        let summary = value.summary.unwrap();
+        let link = value.link.unwrap();
+
+        // reserve space for the link + one space
+        character_budget -= link.len() + 2;
+
+        // Push the title
+        if character_budget > 0 {
+            status.push_str(title.get(0..character_budget).unwrap_or(title.as_str()));
+            character_budget -= title.len() + 2;
+            status.push_str("\n")
+        }
+
+        // Push the summary
+        if character_budget > 0 {
+            status.push_str(summary.get(0..character_budget).unwrap_or(summary.as_str()));
+            character_budget -= summary.len() + 2;
+            status.push_str("\n")
+        }
+
+        // Push the link
+        status.push_str(link.as_str());
+
+        PostStatusRequest {
+            status,
+            language: String::from("ro"),
+            visibility: String::from("public"),
+            media_ids: vec![],
+        }
     }
 }
 

@@ -43,6 +43,6 @@ services:
       - "mastodon-bot-nas"
       - "--redis-consumer-name"
       - "mastodon-bot-1"
-      - "bluesky"
+      - "mastodon"
       - "--access-token"
       - "REPLACE-ME"

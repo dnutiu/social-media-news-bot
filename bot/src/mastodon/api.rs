@@ -36,14 +36,22 @@ impl From<NewsPost> for PostStatusRequest {
 
         // Push the title
         if character_budget > 0 {
-            status.push_str(title.get(0..character_budget as usize).unwrap_or(title.as_str()));
+            status.push_str(
+                title
+                    .get(0..character_budget as usize)
+                    .unwrap_or(title.as_str()),
+            );
             character_budget -= title.len() as i32 + 2;
             status.push('\n')
         }
 
         // Push the summary
         if character_budget > 0 {
-            status.push_str(summary.get(0..character_budget as usize).unwrap_or(summary.as_str()));
+            status.push_str(
+                summary
+                    .get(0..character_budget as usize)
+                    .unwrap_or(summary.as_str()),
+            );
             status.push('\n')
         }
 

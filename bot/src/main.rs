@@ -134,9 +134,14 @@ async fn main() -> Result<(), anyhow::Error> {
                     Ok(post) => {
                         // Step1: Upload image to Mastodon
                         let media_response = if post.image.is_some() {
-                            Ok(mastodon_client
+                            let response = mastodon_client
                                 .upload_media_by_url(post.image.clone().unwrap().as_str())
-                                .await?)
+                                .await;
+
+                            match response {
+                                Ok(response) => Ok(response),
+                                Err(err) => Err(anyhow!("failed to upload image: {err}")),
+                            }
                         } else {
                             Err(anyhow!("No image exists on post."))
                         };

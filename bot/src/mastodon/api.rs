@@ -38,13 +38,13 @@ impl From<NewsPost> for PostStatusRequest {
         if character_budget > 0 {
             status.push_str(title.get(0..character_budget).unwrap_or(title.as_str()));
             character_budget -= title.len() + 2;
-            status.push_str("\n")
+            status.push('\n')
         }
 
         // Push the summary
         if character_budget > 0 {
             status.push_str(summary.get(0..character_budget).unwrap_or(summary.as_str()));
-            status.push_str("\n")
+            status.push('\n')
         }
 
         // Push the link

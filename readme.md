@@ -46,5 +46,24 @@ things simple and due to its powerful features and flexibility[1].
 
 The BlueSky bot reads data from Redis Streams and publishes it to BlueSky.
 
+```shell
+Social media posting bot.
+
+Usage: bot --redis-connection-string <REDIS_CONNECTION_STRING> --redis-stream-name <REDIS_STREAM_NAME> --redis-consumer-group <REDIS_CONSUMER_GROUP> --redis-consumer-name <REDIS_CONSUMER_NAME> <COMMAND>
+
+Commands:
+  bluesky   Post on bluesky platform
+  mastodon  Post on Mastodon, the FediVerse
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+  -r, --redis-connection-string <REDIS_CONNECTION_STRING>  Redis host
+  -t, --redis-stream-name <REDIS_STREAM_NAME>              Redis stream name
+  -c, --redis-consumer-group <REDIS_CONSUMER_GROUP>        Redis consumer group name
+  -n, --redis-consumer-name <REDIS_CONSUMER_NAME>          The current consumer name
+  -h, --help                                               Print help
+  -V, --version                                            Print version
+```
+
 [1] - https://redis.io/about/
 

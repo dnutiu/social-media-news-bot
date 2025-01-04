@@ -1,3 +1,4 @@
+use post::NewsPost;
 use serde::{Deserialize, Serialize};
 
 /// Is a truncated response from Mastodon's /api/v2/media endpoint.
@@ -17,7 +18,13 @@ pub struct PostStatusRequest {
     pub status: String,
     pub language: String,
     pub visibility: String,
-    pub media_ids: Vec<u64>,
+    pub media_ids: Vec<String>,
+}
+
+impl From<NewsPost> for PostStatusRequest {
+    fn from(value: NewsPost) -> Self {
+        todo!()
+    }
 }
 
 /// Is a partial response from /api/v1/statuses route.

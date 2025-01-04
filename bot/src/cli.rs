@@ -1,6 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 
-/// Bluesky Command Arguments
+/// Bluesky command arguments
 #[derive(Args, Debug)]
 pub struct BlueskyCommand {
     /// The Bluesky bot user's handle.
@@ -10,6 +10,14 @@ pub struct BlueskyCommand {
     /// The Bluesky bot user's password.
     #[arg(short = 'p', long)]
     pub bluesky_password: String,
+}
+
+/// Mastodon command arguments
+#[derive(Args, Debug)]
+pub struct MastodonCommand {
+    /// The Bluesky bot user's handle.
+    #[arg(short = 'a', long)]
+    pub access_token: String,
 }
 
 #[derive(Parser, Debug)]
@@ -42,5 +50,5 @@ pub enum Command {
     /// Post on bluesky platform.
     Bluesky(BlueskyCommand),
     /// Post on Mastodon, the FediVerse
-    Mastodon,
+    Mastodon(MastodonCommand),
 }

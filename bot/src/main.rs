@@ -1,5 +1,8 @@
 use crate::bluesky::BlueSkyClient;
 use crate::cli::{CliArgs, Command};
+use crate::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
+use crate::mastodon::MastodonClient;
+use anyhow::{anyhow, Error};
 use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};
@@ -115,8 +118,54 @@ async fn main() -> Result<(), anyhow::Error> {
                 }
             }
         }
-        Command::Mastodon => {
-            unimplemented!("This command is not currently implemented.")
+        Command::Mastodon(mastodon) => {
+            let mut mastodon_client = MastodonClient::new(mastodon.access_token);
+            // Read from stream
+            while running.load(Ordering::SeqCst) {
+                match redis_service
+                    .read_stream::<NewsPost>(
+                        &args.redis_stream_name,
+                        &args.redis_consumer_group,
+                        &args.redis_consumer_name,
+                        5000,
+                    )
+                    .await
+                {
+                    Ok(post) => {
+                        // Step1: Upload image to Mastodon
+                        let media_response = if post.image.is_some() {
+                            Ok(mastodon_client
+                                .upload_media_by_url(post.image.clone().unwrap().as_str())
+                                .await?)
+                        } else {
+                            Err(anyhow!("No image exists on post."))
+                        };
+
+                        // Step2: Post to Mastodon.
+                        let mut status: PostStatusRequest = post.into();
+                        match media_response {
+                            Ok(response) => {
+                                status.media_ids.push(response.id);
+                            }
+                            Err(err) => {
+                                error!("Error uploading image: {err}")
+                            }
+                        }
+                        let response = mastodon_client.post_status(status).await;
+                        match response {
+                            Ok(response) => {
+                                info!("Posted tooth on Mastodon! {response:?}")
+                            }
+                            Err(err) => {
+                                error!("Failed to post toot on Mastodon: {err}")
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        error!("error reading stream: {err}")
+                    }
+                }
+            }
         }
     }
 

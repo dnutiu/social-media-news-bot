@@ -44,7 +44,6 @@ impl From<NewsPost> for PostStatusRequest {
         // Push the summary
         if character_budget > 0 {
             status.push_str(summary.get(0..character_budget).unwrap_or(summary.as_str()));
-            character_budget -= summary.len() + 2;
             status.push_str("\n")
         }
 

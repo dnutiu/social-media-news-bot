@@ -2,6 +2,7 @@ version: '3.8'
 services:
   scraper:
     container_name: g4media-scraper
+    restart: always
     image: metonymy/scrapper
     environment:
       RUST_LOG: info
@@ -12,6 +13,7 @@ services:
       - "posts::g4media"
   bluesky-bot:
     container_name: bluesky-bot-1
+    restart: always
     image: metonymy/bot
     environment:
       RUST_LOG: info
@@ -31,6 +33,7 @@ services:
       - "REPLACE-ME"
   mastodon-bot:
     container_name: mastodon-bot-1
+    restart: always
     image: metonymy/bot
     environment:
       RUST_LOG: info

@@ -32,7 +32,7 @@ impl From<NewsPost> for PostStatusRequest {
         let link = value.link.unwrap();
 
         // reserve space for the link + one space
-        character_budget -= link.len() as i32 + 2;
+        character_budget -= 25;
 
         // Push the title
         if character_budget > 0 {

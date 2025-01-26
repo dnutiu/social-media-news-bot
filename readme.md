@@ -46,9 +46,9 @@ Options:
 Redis is a key-value store with lots of features. It has been chosen to keep 
 things simple and due to its powerful features and flexibility[1].
 
-3. BlueSky Bot
+3. BlueSky / Mastodon Bot
 
-The BlueSky bot reads data from Redis Streams and publishes it to BlueSky.
+The bot reads data from Redis Streams and publishes it to the selected platform.
 
 ```shell
 Social media posting bot.

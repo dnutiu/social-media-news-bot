@@ -79,6 +79,7 @@ impl ScrappableWebPage for G4Media {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::scrapper::gfourmedia::G4Media;
     use crate::scrapper::WebScrapperEngine;

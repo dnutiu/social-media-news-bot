@@ -97,8 +97,10 @@ async fn main() -> Result<(), anyhow::Error> {
         info!("Received post {:?}", news_post);
         if news_post.is_complete() {
             let title = news_post.title.clone().unwrap();
-            // TODO: add stream name in the flag key
-            if !redis_service.is_key_flagged(&title).await {
+            if !redis_service
+                .is_key_flagged(format!("{}-{}", &args.redis_stream_name, &title).as_str())
+                .await
+            {
                 let published = redis_service
                     .publish(&args.redis_stream_name, &news_post)
                     .await;

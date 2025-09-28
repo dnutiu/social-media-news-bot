@@ -27,9 +27,9 @@ impl From<NewsPost> for PostStatusRequest {
 
         // The character budget for mastodon.social.
         let mut character_budget: i32 = 500;
-        let title = value.title.unwrap();
-        let summary = value.summary.unwrap();
-        let link = value.link.unwrap();
+        let title = value.title.unwrap_or(String::from("Post Title"));
+        let summary = value.summary.unwrap_or(String::from(""));
+        let link = value.link.unwrap_or(String::from(""));
 
         // reserve space for the link + one space
         character_budget -= 25;

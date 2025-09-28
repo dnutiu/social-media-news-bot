@@ -1,3 +1,4 @@
+use std::string::String;
 use crate::scrapper::ScrappableWebPage;
 use anyhow::anyhow;
 use post::NewsPost;
@@ -59,6 +60,7 @@ impl ScrappableWebPage for HotNews {
                 }
             }
             news_post.author = Option::from(self.default_author.clone());
+            news_post.summary = Option::from(String::from(""));
 
             posts.push(news_post);
         }

@@ -78,3 +78,25 @@ impl ScrappableWebPage for G4Media {
         Ok(posts)
     }
 }
+
+mod tests {
+    use crate::scrapper::gfourmedia::G4Media;
+    use crate::scrapper::WebScrapperEngine;
+
+    #[tokio::test]
+    async fn sanity_test() {
+        let posts = WebScrapperEngine::get_posts(G4Media::default()).await;
+
+        assert!(posts.is_ok());
+
+        let posts = posts.unwrap();
+
+        assert_eq!(posts.len() > 0, true);
+
+        assert!(posts[0].image.is_some());
+        assert!(posts[0].title.is_some());
+        assert!(posts[0].summary.is_some());
+        assert!(posts[0].link.is_some());
+        assert!(posts[0].author.is_some());
+    }
+}

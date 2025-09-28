@@ -123,14 +123,14 @@ impl From<NewsPost> for ATProtoRepoCreateRecord {
                 post.title.clone().unwrap_or(String::from("")).as_str(),
                 dt_utc,
                 Some(ATprotoRepoCreateRecordEmbed::new(
-                    post.link.unwrap().as_str(),
-                    post.title.unwrap().as_str(),
+                    post.link.unwrap_or_default().as_str(),
+                    post.title.unwrap_or_default().as_str(),
                     post.summary
                         .clone()
-                        .unwrap()
+                        .unwrap_or_default()
                         .as_str()
                         .get(0..=300)
-                        .unwrap_or(post.summary.unwrap().as_str()),
+                        .unwrap_or(post.summary.unwrap_or_default().as_str()),
                     None,
                 )),
             ),

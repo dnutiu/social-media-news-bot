@@ -15,3 +15,4 @@ clap = { version = "4.5.23", features = ["derive"] }
 post = {path = "../post"}
 infrastructure = { path = "../infrastructure"}
 signal-hook = "0.3.17"
+async-trait = "0.1.89"

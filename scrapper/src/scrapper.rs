@@ -1,10 +1,12 @@
 use post::NewsPost;
+use async_trait::async_trait;
 
 pub(crate) mod gfourmedia;
 pub(crate) mod hotnews;
 
 /// Represents a web scrapper which is can be scraped by the engine.
-pub(crate) trait ScrappableWebPage {
+#[async_trait]
+pub(crate) trait ScrappableWebPage: Send + Sync {
     fn get_url(&self) -> &str;
     fn get_posts(&self, html: String) -> Result<Vec<NewsPost>, anyhow::Error>;
 }

@@ -47,7 +47,7 @@ impl ScrappableWebPage for HotNews {
             };
 
             if let Some(post_title) = element.select(&post_title_selector).next() {
-                news_post.title = Some(post_title.inner_html());
+                news_post.title = Some(post_title.inner_html().trim().to_string());
                 if let Some(href) = post_title.value().attr("href") {
                     news_post.link = Some(href.to_owned());
                 }

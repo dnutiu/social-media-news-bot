@@ -57,12 +57,14 @@ where
             );
         }
     }
+    info!("Scrape job finished for {}",  std::any::type_name::<S>())
 }
 
 /// Runs the scraping job at the specified interval.
 fn run_scrapping_job(scheduler: &mut AsyncScheduler, tx: Sender<NewsPost>, interval: Interval) {
     scheduler.every(interval).run(move || {
         let tx = tx.clone();
+        info!("Running the scrapping job.");
         async move {
             // Run scrapping jobs concurrently.
             tokio::join!(

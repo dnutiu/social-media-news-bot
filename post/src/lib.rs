@@ -18,6 +18,6 @@ pub struct NewsPost {
 impl NewsPost {
     /// Is complete checks if the news post contains the minimum fields.
     pub fn is_complete(&self) -> bool {
-        self.title.is_some() && self.summary.is_some() && self.link.is_some()
+        self.title.is_some() && self.link.is_some()
     }
 }

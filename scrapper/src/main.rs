@@ -1,6 +1,7 @@
 use crate::cli::CliArgs;
 use crate::scrapper::gfourmedia::G4Media;
-use crate::scrapper::WebScrapperEngine;
+use crate::scrapper::hotnews::HotNews;
+use crate::scrapper::{ScrappableWebPage, WebScrapperEngine};
 use clap::Parser;
 use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use infrastructure::RedisService;
@@ -33,20 +34,41 @@ fn run_scheduler(mut scheduler: AsyncScheduler, running: Arc<AtomicBool>) -> Joi
     })
 }
 
+// Helper function to handle the logic for a single scrape source
+async fn scrape_and_send<S>(source: S, tx: &Sender<NewsPost>)
+where
+    S: ScrappableWebPage + Default,
+{
+    match WebScrapperEngine::get_posts(source).await {
+        Ok(posts) => {
+            for p in posts.iter().filter(|p| p.is_complete()) {
+                // Log an error if the channel is closed, but don't panic
+                if tx.send(p.clone()).is_err() {
+                    error!("Receiver has been dropped. Could not send post: {:?}", p);
+                }
+            }
+        }
+        Err(e) => {
+            // Log the error from the scraping itself
+            error!(
+                "Failed to get posts for source {}: {:?}",
+                std::any::type_name::<S>(),
+                e
+            );
+        }
+    }
+}
+
 /// Runs the scraping job at the specified interval.
 fn run_scrapping_job(scheduler: &mut AsyncScheduler, tx: Sender<NewsPost>, interval: Interval) {
     scheduler.every(interval).run(move || {
         let tx = tx.clone();
         async move {
-            let posts = WebScrapperEngine::get_posts(G4Media::default())
-                .await
-                .expect("failed to get posts");
-            posts.iter().filter(|p| p.is_complete()).for_each(|p| {
-                let result = tx.send(p.clone());
-                if result.is_err() {
-                    error!("Failed to send post {:?} to the channel", p)
-                }
-            });
+            // Run scrapping jobs concurrently.
+            tokio::join!(
+                scrape_and_send::<G4Media>(G4Media::default(), &tx),
+                scrape_and_send::<HotNews>(HotNews::default(), &tx)
+            );
         }
     });
 }

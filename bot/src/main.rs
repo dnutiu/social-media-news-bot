@@ -11,7 +11,7 @@ use signal_hook::consts::{SIGINT, SIGTERM};
 use signal_hook::iterator::Signals;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::thread;
+use std::{thread, time};
 
 mod bluesky;
 mod cli;
@@ -111,6 +111,8 @@ async fn main() -> Result<(), anyhow::Error> {
                                 error!("failed to convert post to json: {post:?} {err}")
                             }
                         }
+                        // Sleep in order to avoid overwhelming service.
+                        tokio::time::sleep(time::Duration::from_secs(args.post_pause_time)).await
                     }
                     Err(err) => {
                         error!("error reading stream: {err}")
@@ -165,6 +167,8 @@ async fn main() -> Result<(), anyhow::Error> {
                                 error!("Failed to post toot on Mastodon: {err}")
                             }
                         }
+                        // Sleep in order to avoid overwhelming service.
+                        tokio::time::sleep(time::Duration::from_secs(args.post_pause_time)).await
                     }
                     Err(err) => {
                         error!("error reading stream: {err}")

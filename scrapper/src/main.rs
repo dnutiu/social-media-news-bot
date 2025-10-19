@@ -57,7 +57,7 @@ where
             );
         }
     }
-    info!("Scrape job finished for {}",  std::any::type_name::<S>())
+    info!("Scrape job finished for {}", std::any::type_name::<S>())
 }
 
 /// Runs the scraping job at the specified interval.

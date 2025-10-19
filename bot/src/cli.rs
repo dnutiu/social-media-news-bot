@@ -39,6 +39,10 @@ pub struct CliArgs {
     #[arg(short = 'n', long)]
     pub redis_consumer_name: String,
 
+    /// Represents the time in seconds to pause between posts.
+    #[arg(short = 's', long, default_value_t = 10)]
+    pub post_pause_time: u64,
+
     /// Platform
     #[command(subcommand)]
     pub platform: Command,

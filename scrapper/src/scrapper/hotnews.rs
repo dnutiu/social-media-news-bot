@@ -1,8 +1,8 @@
-use std::string::String;
 use crate::scrapper::ScrappableWebPage;
 use anyhow::anyhow;
 use post::NewsPost;
 use scraper::{Html, Selector};
+use std::string::String;
 
 #[derive(Debug)]
 /// HotNews website scraper

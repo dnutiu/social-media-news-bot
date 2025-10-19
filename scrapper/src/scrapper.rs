@@ -1,5 +1,5 @@
-use post::NewsPost;
 use async_trait::async_trait;
+use post::NewsPost;
 
 pub(crate) mod gfourmedia;
 pub(crate) mod hotnews;

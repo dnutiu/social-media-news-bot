@@ -140,8 +140,7 @@ mod tests {
     use rand::distributions::{Alphanumeric, DistString};
     use redis::RedisResult;
     use serial_test::serial;
-
-    const REDIS_CONNECTION_STRING: &str = "redis://localhost:6379";
+    use std::env;
 
     /// Cleans up the database
     async fn cleanup(redis_service: &mut RedisService) {
@@ -154,16 +153,25 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_redis_service_new() {
-        let _ = RedisService::new(REDIS_CONNECTION_STRING).await;
+        let redis_connection_string: String = env::var("REDIS_TESTS_URL")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .unwrap_or_else(|| "redis://localhost:6379".to_string());
+
+        let _ = RedisService::new(&redis_connection_string).await;
     }
 
     #[tokio::test]
     #[serial]
     async fn test_redis_service_key_exists_false() {
         // Setup
+        let redis_connection_string: String = env::var("REDIS_TESTS_URL")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .unwrap_or_else(|| "redis://localhost:6379".to_string());
         let random_post = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
 
-        let mut service = RedisService::new(REDIS_CONNECTION_STRING).await;
+        let mut service = RedisService::new(&redis_connection_string).await;
 
         // Test
         let result = service.is_key_flagged(&random_post).await;
@@ -177,9 +185,13 @@ mod tests {
     #[serial]
     async fn test_redis_service_key_exists_true() {
         // Setup
+        let redis_connection_string: String = env::var("REDIS_TESTS_URL")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .unwrap_or_else(|| "redis://localhost:6379".to_string());
         let random_post = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
 
-        let mut service = RedisService::new(REDIS_CONNECTION_STRING).await;
+        let mut service = RedisService::new(&redis_connection_string).await;
         service.flag_key(&random_post, 10).await;
 
         // Test
@@ -194,9 +206,13 @@ mod tests {
     #[serial]
     async fn test_redis_service_publish() {
         // Setup
+        let redis_connection_string: String = env::var("REDIS_TESTS_URL")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .unwrap_or_else(|| "redis://localhost:6379".to_string());
         let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
 
-        let mut service = RedisService::new(REDIS_CONNECTION_STRING).await;
+        let mut service = RedisService::new(&redis_connection_string).await;
 
         // Test
         let post = NewsPost {
@@ -223,9 +239,13 @@ mod tests {
     #[serial]
     async fn test_redis_service_read() -> Result<(), anyhow::Error> {
         // Setup
+        let redis_connection_string: String = env::var("REDIS_TESTS_URL")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .unwrap_or_else(|| "redis://localhost:6379".to_string());
         let random_stream_name = Alphanumeric.sample_string(&mut rand::thread_rng(), 6);
 
-        let mut service = RedisService::new(REDIS_CONNECTION_STRING).await;
+        let mut service = RedisService::new(&redis_connection_string).await;
         let post = NewsPost {
             image: Some(String::from("i")),
             title: Some(String::from("t")),

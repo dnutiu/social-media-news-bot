@@ -26,10 +26,10 @@ It scrapes data from one or more websites and publishes a JSON on **Redis Stream
 It is configured via CLI arguments 
 
 ```bash
-Usage: scrapper [OPTIONS] --redis-connection-string <REDIS_CONNECTION_STRING> --redis-stream-name <REDIS_STREAM_NAME>
+Usage: scrapper [OPTIONS] --redis-connection-string <redis_connection_string> --redis-stream-name <REDIS_STREAM_NAME>
 
 Options:
-  -r, --redis-connection-string <REDIS_CONNECTION_STRING>
+  -r, --redis-connection-string <redis_connection_string>
           Redis host
   -t, --redis-stream-name <REDIS_STREAM_NAME>
           Redis stream name
@@ -53,7 +53,7 @@ The bot reads data from Redis Streams and publishes it to the selected platform.
 ```shell
 Social media posting bot.
 
-Usage: bot --redis-connection-string <REDIS_CONNECTION_STRING> --redis-stream-name <REDIS_STREAM_NAME> --redis-consumer-group <REDIS_CONSUMER_GROUP> --redis-consumer-name <REDIS_CONSUMER_NAME> <COMMAND>
+Usage: bot --redis-connection-string <redis_connection_string> --redis-stream-name <REDIS_STREAM_NAME> --redis-consumer-group <REDIS_CONSUMER_GROUP> --redis-consumer-name <REDIS_CONSUMER_NAME> <COMMAND>
 
 Commands:
   bluesky   Post on bluesky platform
@@ -61,7 +61,7 @@ Commands:
   help      Print this message or the help of the given subcommand(s)
 
 Options:
-  -r, --redis-connection-string <REDIS_CONNECTION_STRING>  Redis host
+  -r, --redis-connection-string <redis_connection_string>  Redis host
   -t, --redis-stream-name <REDIS_STREAM_NAME>              Redis stream name
   -c, --redis-consumer-group <REDIS_CONSUMER_GROUP>        Redis consumer group name
   -n, --redis-consumer-name <REDIS_CONSUMER_NAME>          The current consumer name

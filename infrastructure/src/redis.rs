@@ -169,7 +169,7 @@ mod tests {
         let result = service.is_key_flagged(&random_post).await;
 
         // Assert
-        assert_eq!(result, false);
+        assert!(!result);
         cleanup(&mut service).await;
     }
 
@@ -186,7 +186,7 @@ mod tests {
         let result = service.is_key_flagged(&random_post).await;
 
         // Assert
-        assert_eq!(result, true);
+        assert!(result);
         cleanup(&mut service).await;
     }
 
@@ -214,7 +214,7 @@ mod tests {
             .await;
 
         // Assert
-        assert_eq!(result, true);
+        assert!(result);
         assert_eq!(stream_length, Ok(1));
         cleanup(&mut service).await;
     }

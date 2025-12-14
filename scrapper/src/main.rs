@@ -40,7 +40,11 @@ where
 {
     match WebScrapperEngine::get_posts(source).await {
         Ok(posts) => {
-            for p in posts.iter().filter(|p| p.is_complete()).take(max_posts_per_run as usize) {
+            for p in posts
+                .iter()
+                .filter(|p| p.is_complete())
+                .take(max_posts_per_run as usize)
+            {
                 // Log an error if the channel is closed, but don't panic
                 if tx.send(p.clone()).is_err() {
                     error!("Receiver has been dropped. Could not send post: {:?}", p);
@@ -60,15 +64,22 @@ where
 }
 
 /// Runs the scraping job at the specified interval.
-fn run_scrapping_job(scheduler: &mut AsyncScheduler, tx: Sender<NewsPost>, interval: Interval, max_posts_per_run: u64) {
+fn run_scrapping_job(
+    scheduler: &mut AsyncScheduler,
+    tx: Sender<NewsPost>,
+    interval: Interval,
+    max_posts_per_run: u64,
+) {
     scheduler.every(interval).run(move || {
         let tx = tx.clone();
         info!("Running the scrapping job.");
         async move {
             // Run scrapping jobs concurrently.
-            tokio::join!(
-                scrape_and_send::<HotNews>(HotNews::default(), &tx, max_posts_per_run)
-            );
+            tokio::join!(scrape_and_send::<HotNews>(
+                HotNews::default(),
+                &tx,
+                max_posts_per_run
+            ));
         }
     });
 }
@@ -106,7 +117,12 @@ async fn main() -> Result<(), anyhow::Error> {
         }
     });
 
-    run_scrapping_job(&mut scheduler, tx, args.scrape_interval_minutes.minutes(), args.max_posts_per_run);
+    run_scrapping_job(
+        &mut scheduler,
+        tx,
+        args.scrape_interval_minutes.minutes(),
+        args.max_posts_per_run,
+    );
 
     // Run the scheduler in a separate thread.
     let handle = run_scheduler(scheduler, running.clone());

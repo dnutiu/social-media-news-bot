@@ -5,15 +5,19 @@ stages:
 variables:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
+  CARGO_HOME: $CI_PROJECT_DIR/.cargo
 
 default:
   image: rust:1.92-bullseye
   cache:
     key: "$CI_PROJECT_NAME-cargo"
     paths:
+      # Cache downloaded crates and git repos
+      - .cargo/registry/index/
+      - .cargo/registry/cache/
+      - .cargo/git/db/
+      # Cache build artifacts (compiled dependencies)
       - target/
-      - .cargo/registry/
-      - .cargo/git/
   before_script:
     - rustc -V
     - cargo -V

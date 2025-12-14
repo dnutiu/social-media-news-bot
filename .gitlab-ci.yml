@@ -1,0 +1,63 @@
+stages:
+  - lint
+  - test
+  - pages
+
+variables:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+default:
+  image: rust:1.92-bullseye
+  cache:
+    key: "$CI_PROJECT_NAME-cargo"
+    paths:
+      - target/
+      - .cargo/registry/
+      - .cargo/git/
+  before_script:
+    - rustc -V
+    - cargo -V
+    - rustup component add clippy rustfmt || true
+
+lint:clippy:
+  stage: lint
+  script:
+    - cargo clippy --workspace --all-targets -- -D warnings
+
+lint:fmt:
+  stage: lint
+  script:
+    - cargo fmt --all -- --check
+
+test:
+  stage: test
+  services:
+    - name: redis:7-alpine
+      alias: redis
+  variables:
+    # If your tests read the Redis URL from env, point to the service hostname
+    REDIS_URL: redis://redis:6379
+  before_script:
+    - rustc -V && cargo -V
+    # Install redis-cli to wait for the Redis service to be ready
+    - apt-get update && apt-get install -y --no-install-recommends redis-tools >/dev/null
+    - |
+      echo "Waiting for Redis to be ready..."
+      for i in {1..60}; do
+        redis-cli -h redis -p 6379 ping && break
+        sleep 1
+      done
+      echo "Redis PING: $(redis-cli -h redis -p 6379 ping)"
+  script:
+    - cargo test --workspace --all-features --no-fail-fast -- --nocapture
+
+pages:
+  stage: pages
+  script:
+    - cargo doc --workspace --no-deps --target-dir public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

@@ -1,5 +1,4 @@
 use crate::cli::CliArgs;
-use crate::scrapper::gfourmedia::G4Media;
 use crate::scrapper::hotnews::HotNews;
 use crate::scrapper::{ScrappableWebPage, WebScrapperEngine};
 use clap::Parser;
@@ -68,7 +67,6 @@ fn run_scrapping_job(scheduler: &mut AsyncScheduler, tx: Sender<NewsPost>, inter
         async move {
             // Run scrapping jobs concurrently.
             tokio::join!(
-                scrape_and_send::<G4Media>(G4Media::default(), &tx),
                 scrape_and_send::<HotNews>(HotNews::default(), &tx)
             );
         }

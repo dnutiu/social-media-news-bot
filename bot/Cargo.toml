@@ -8,7 +8,6 @@ tokio = { version = "1", features = ["full"] }
 clap = { version = "4.5.23", features = ["derive"] }
 post = {path = "../post"}
 infrastructure = { path = "../infrastructure"}
-signal-hook = "0.3.17"
 log = "0.4.22"
 env_logger = "0.11.6"
 anyhow = "1.0.95"

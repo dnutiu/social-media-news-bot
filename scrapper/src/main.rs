@@ -7,7 +7,6 @@ use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use infrastructure::RedisService;
 use log::{debug, error, info};
 use post::NewsPost;
-use signal_hook::{consts::SIGINT, consts::SIGTERM, iterator::Signals};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc};
@@ -95,17 +94,14 @@ async fn main() -> Result<(), anyhow::Error> {
     let r = running.clone();
 
     thread::spawn(move || {
-        let signals = Signals::new([SIGINT, SIGTERM]);
-        match signals {
-            Ok(mut signal_info) => {
-                if signal_info.forever().next().is_some() {
-                    r.store(false, Ordering::SeqCst);
-                }
+        thread::spawn(async move || {
+            if let Err(e) = tokio::signal::ctrl_c().await {
+                error!("Failed to listen for shutdown signal: {}", e);
+            } else {
+                info!("Shutdown signal received");
+                r.store(false, Ordering::SeqCst);
             }
-            Err(error) => {
-                error!("Failed to setup signal handler: {error}")
-            }
-        }
+        });
     });
 
     run_scrapping_job(&mut scheduler, tx, args.scrape_interval_minutes.minutes());

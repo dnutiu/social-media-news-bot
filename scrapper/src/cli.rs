@@ -14,4 +14,8 @@ pub struct CliArgs {
     /// The scraping interval in minutes
     #[arg(short, long, default_value_t = 60)]
     pub scrape_interval_minutes: u32,
+
+    /// Scrape the maximum posts.
+    #[arg(short = 'm', long, default_value_t = 10)]
+    pub max_posts_per_run: u64,
 }

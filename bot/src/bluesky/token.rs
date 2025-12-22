@@ -52,7 +52,6 @@ impl Display for Token {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow;
 
     #[test]
     fn test_is_expired_true() -> Result<(), anyhow::Error> {
@@ -77,7 +76,7 @@ mod tests {
         let result = token.is_expired()?;
 
         // Assert
-        assert_eq!(result, true);
+        assert!(result);
         Ok(())
     }
 
@@ -106,7 +105,7 @@ mod tests {
         let result = token.is_expired()?;
 
         // Assert
-        assert_eq!(result, false);
+        assert!(!result);
         Ok(())
     }
 

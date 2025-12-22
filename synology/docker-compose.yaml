@@ -1,5 +1,10 @@
 version: '3.8'
 services:
+  redis:
+    image: redis/redis-stack:7.4.0-v8
+    restart: always
+    volumes:
+      - redis_data:/data
   scraper:
     container_name: g4media-scraper
     restart: always
@@ -49,3 +54,6 @@ services:
       - "mastodon"
       - "--access-token"
       - "REPLACE-ME"
+volumes:
+  redis_data:
+    driver: local

@@ -82,7 +82,7 @@ mod tests {
 
         let posts = posts.unwrap();
 
-        assert_eq!(posts.len() > 0, true);
+        assert!(!posts.is_empty());
 
         assert!(posts[0].image.is_some());
         assert!(posts[0].title.is_some());

@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use post::NewsPost;
 
+pub(crate) mod gfourmedia;
 pub(crate) mod hotnews;
 
 /// Represents a web scrapper which is can be scraped by the engine.

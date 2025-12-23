@@ -1,4 +1,5 @@
 use crate::cli::CliArgs;
+use crate::scrapper::gfourmedia::GFourMedia;
 use crate::scrapper::hotnews::HotNews;
 use crate::scrapper::{ScrappableWebPage, WebScrapperEngine};
 use clap::Parser;
@@ -74,11 +75,10 @@ fn run_scrapping_job(
         info!("Running the scrapping job.");
         async move {
             // Run scrapping jobs concurrently.
-            tokio::join!(scrape_and_send::<HotNews>(
-                HotNews::default(),
-                &tx,
-                max_posts_per_run
-            ));
+            tokio::join!(
+                scrape_and_send::<HotNews>(HotNews::default(), &tx, max_posts_per_run),
+                scrape_and_send::<GFourMedia>(GFourMedia::default(), &tx, max_posts_per_run)
+            );
         }
     });
 }

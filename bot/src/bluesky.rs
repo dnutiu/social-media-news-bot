@@ -3,7 +3,9 @@ mod token;
 
 use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
 use anyhow::anyhow;
+use log::debug;
 use reqwest::Body;
+use std::fmt;
 use token::Token;
 
 /// The BlueSky client used to interact with the platform.
@@ -27,6 +29,7 @@ impl BlueSkyClient {
             .body(body)
             .send()
             .await?
+            .error_for_status()?
             .json()
             .await?;
 
@@ -39,13 +42,13 @@ impl BlueSkyClient {
     /// Makes a new tweet.
     pub async fn post<T>(&mut self, body: T) -> Result<(), anyhow::Error>
     where
-        T: Into<Body>,
+        T: Into<Body> + fmt::Debug + Clone,
     {
         let token_expired = self.auth_token.is_expired()?;
         if token_expired {
             self.renew_token().await?;
         }
-        let response_code = self
+        let response = self
             .client
             .post("https://bsky.social/xrpc/com.atproto.repo.createRecord")
             .header("Content-Type", "application/json")
@@ -53,12 +56,15 @@ impl BlueSkyClient {
                 "Authorization",
                 format!("Bearer {}", self.auth_token.access_jwt),
             )
-            .body(body)
+            .body(body.clone())
             .send()
-            .await?
-            .status();
+            .await?;
 
+        let response_code = response.status();
         if response_code != 200 {
+            let response_text = response.text().await?;
+            debug!("Request:\n{body:?}\nEND");
+            debug!("Response:\n{response_text}\nEND");
             return Err(anyhow!("Failed to post on BlueSky, got {response_code}"));
         }
         Ok(())
@@ -76,6 +82,7 @@ impl BlueSkyClient {
             )
             .send()
             .await?
+            .error_for_status()?
             .json()
             .await?;
         self.auth_token = result;
@@ -92,6 +99,7 @@ impl BlueSkyClient {
             .get(image_url)
             .send()
             .await?
+            .error_for_status()?
             .bytes()
             .await?
             .to_vec();
@@ -107,6 +115,7 @@ impl BlueSkyClient {
             .body(data)
             .send()
             .await?
+            .error_for_status()?
             .json()
             .await?)
     }

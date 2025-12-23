@@ -19,7 +19,11 @@ impl WebScrapperEngine {
     where
         P: ScrappableWebPage,
     {
-        let body = reqwest::get(web_page.get_url()).await?.text().await?;
+        let body = reqwest::get(web_page.get_url())
+            .await?
+            .error_for_status()?
+            .text()
+            .await?;
 
         let results = web_page.get_posts(body)?;
         Ok(results)

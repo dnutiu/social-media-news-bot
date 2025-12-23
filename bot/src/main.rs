@@ -54,7 +54,7 @@ async fn main() -> Result<(), anyhow::Error> {
     // Redis setup
     let mut redis_service = RedisService::new(&args.redis_connection_string).await;
 
-    // Create consumer group for stream.
+    // Create a consumer group for stream.
     let result = redis_service
         .create_group(&args.redis_stream_name, &args.redis_consumer_group, 0)
         .await;

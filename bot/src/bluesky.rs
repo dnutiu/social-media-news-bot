@@ -1,9 +1,12 @@
 pub(crate) mod atproto;
 mod token;
 
+use crate::add_image_to_post;
 use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
-use anyhow::anyhow;
-use log::debug;
+use anyhow::{anyhow, Error};
+use async_trait::async_trait;
+use log::{debug, error, info, warn};
+use post::{NewsPost, Publisher};
 use reqwest::Body;
 use std::fmt;
 use token::Token;
@@ -11,6 +14,7 @@ use token::Token;
 /// The BlueSky client used to interact with the platform.
 pub struct BlueSkyClient {
     auth_token: Token,
+    user_handle: String,
     client: reqwest::Client,
 }
 
@@ -35,6 +39,7 @@ impl BlueSkyClient {
 
         Ok(BlueSkyClient {
             auth_token: token,
+            user_handle: user_handle.to_string(),
             client,
         })
     }
@@ -118,5 +123,36 @@ impl BlueSkyClient {
             .error_for_status()?
             .json()
             .await?)
+    }
+}
+
+#[async_trait]
+impl Publisher for BlueSkyClient {
+    async fn publish_post(&mut self, post: NewsPost) -> Result<(), Error> {
+        let mut data: atproto::ATProtoRepoCreateRecord = post.clone().into();
+        data.repo = self.user_handle.clone();
+
+        if let Some(image_link) = post.image.clone() {
+            let result = add_image_to_post(self, &image_link, &mut data).await;
+            if let Err(err) = result {
+                warn!("Failed to upload image: {err}")
+            }
+        }
+        let json = serde_json::to_string(&data);
+        match json {
+            Ok(json) => {
+                if let Err(err) = self.post(json).await {
+                    error!("failed to post: {post:?} {err}");
+                    Err(err)
+                } else {
+                    info!("Published a post! 🦀");
+                    Ok(())
+                }
+            }
+            Err(err) => {
+                error!("failed to convert post to json: {post:?} {err}");
+                Err(err.into())
+            }
+        }
     }
 }

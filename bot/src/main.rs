@@ -89,7 +89,8 @@ async fn main() -> Result<(), anyhow::Error> {
                 tokio::time::sleep(time::Duration::from_secs(args.post_pause_time)).await
             }
             Err(err) => {
-                error!("error reading stream: {err}")
+                error!("error reading stream: {err}");
+                tokio::time::sleep(time::Duration::from_secs(10)).await
             }
         }
     }

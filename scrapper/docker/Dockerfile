@@ -1,4 +1,4 @@
-FROM rust:1.83.0-bookworm AS planner
+FROM rust:1.92.0-bookworm AS planner
 RUN cargo install cargo-chef
 
 WORKDIR /app
@@ -7,7 +7,7 @@ COPY . .
 # Prepare a build plan ("recipe")
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM rust:1.83.0-bookworm AS builder
+FROM rust:1.92.0-bookworm AS builder
 RUN cargo install cargo-chef
 WORKDIR /app
 

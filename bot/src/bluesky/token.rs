@@ -70,7 +70,10 @@ mod tests {
             access_jwt: "".to_string(),
             refresh_jwt: "".to_string(),
         };
-        token.access_jwt = format!("eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksifQ.{}.oWhKfhGWv6omS3oFQ21GX29uzsd5WrfPJyotJMCQ8V44GF1UN2et7sf_JKVB5jkSuJa6kVWERGuKVGgj8AWScA", base64_data);
+        token.access_jwt = format!(
+            "eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksifQ.{}.oWhKfhGWv6omS3oFQ21GX29uzsd5WrfPJyotJMCQ8V44GF1UN2et7sf_JKVB5jkSuJa6kVWERGuKVGgj8AWScA",
+            base64_data
+        );
 
         // Test
         let result = token.is_expired()?;
@@ -99,7 +102,10 @@ mod tests {
             access_jwt: "".to_string(),
             refresh_jwt: "".to_string(),
         };
-        token.access_jwt = format!("eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksifQ.{}.oWhKfhGWv6omS3oFQ21GX29uzsd5WrfPJyotJMCQ8V44GF1UN2et7sf_JKVB5jkSuJa6kVWERGuKVGgj8AWScA", base64_data);
+        token.access_jwt = format!(
+            "eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NksifQ.{}.oWhKfhGWv6omS3oFQ21GX29uzsd5WrfPJyotJMCQ8V44GF1UN2et7sf_JKVB5jkSuJa6kVWERGuKVGgj8AWScA",
+            base64_data
+        );
 
         // Test
         let result = token.is_expired()?;

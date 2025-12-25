@@ -9,7 +9,7 @@ use log::{debug, error, info};
 use post::NewsPost;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 use std::time::Duration;
 use tokio::task::JoinHandle;

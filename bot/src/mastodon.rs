@@ -1,5 +1,5 @@
 use crate::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
-use anyhow::{anyhow, Error};
+use anyhow::{Error, anyhow};
 use async_trait::async_trait;
 use log::{debug, error, info};
 use post::{NewsPost, Publisher};

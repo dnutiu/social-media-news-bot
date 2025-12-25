@@ -105,8 +105,8 @@ impl ScrappableWebPage for GFourMedia {
 
 #[cfg(test)]
 mod tests {
-    use crate::scrapper::gfourmedia::GFourMedia;
     use crate::WebScrapperEngine;
+    use crate::scrapper::gfourmedia::GFourMedia;
 
     #[tokio::test]
     async fn sanity_test() {

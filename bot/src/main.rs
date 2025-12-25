@@ -5,8 +5,8 @@ use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};
 use post::{NewsPost, Publisher};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{thread, time};
 
 mod bluesky;

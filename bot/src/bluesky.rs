@@ -3,7 +3,7 @@ mod token;
 
 use crate::add_image_to_post;
 use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
-use anyhow::{anyhow, Error};
+use anyhow::{Error, anyhow};
 use async_trait::async_trait;
 use log::{debug, error, info, warn};
 use post::{NewsPost, Publisher};

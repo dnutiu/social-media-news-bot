@@ -1,8 +1,8 @@
 use anyhow::anyhow;
 use log::error;
+use redis::Value::BulkString;
 use redis::aio::MultiplexedConnection;
 use redis::streams::StreamReadReply;
-use redis::Value::BulkString;
 use redis::{AsyncCommands, RedisError, RedisResult, Value};
 use serde::{Deserialize, Serialize};
 

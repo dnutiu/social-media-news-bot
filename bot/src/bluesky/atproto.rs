@@ -212,8 +212,8 @@ mod tests {
     }
 
     #[test]
-    fn test_atproto_repo_create_record_record_embed_and_thumb_serialization(
-    ) -> Result<(), anyhow::Error> {
+    fn test_atproto_repo_create_record_record_embed_and_thumb_serialization()
+    -> Result<(), anyhow::Error> {
         let time_str = "2024-12-30T13:45:00";
         let naive_datetime = NaiveDateTime::parse_from_str(time_str, "%Y-%m-%dT%H:%M:%S").unwrap();
 

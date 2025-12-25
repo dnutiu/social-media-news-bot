@@ -54,11 +54,12 @@ impl ScrappableWebPage for HotNews {
                 }
             }
 
-            if let Some(selected_image) = element.select(&post_img_selector).next() {
-                if let Some(image_source) = selected_image.attr("src") {
-                    news_post.image = Some(image_source.to_string());
-                }
+            if let Some(selected_image) = element.select(&post_img_selector).next()
+                && let Some(image_source) = selected_image.attr("src")
+            {
+                news_post.image = Some(image_source.to_string());
             }
+
             news_post.author = Option::from(self.default_author.clone());
             news_post.summary = Option::from(String::from(""));
 
@@ -71,8 +72,8 @@ impl ScrappableWebPage for HotNews {
 
 #[cfg(test)]
 mod tests {
-    use crate::scrapper::hotnews::HotNews;
     use crate::WebScrapperEngine;
+    use crate::scrapper::hotnews::HotNews;
 
     #[tokio::test]
     async fn sanity_test() {

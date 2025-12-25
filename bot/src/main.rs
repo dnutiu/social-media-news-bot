@@ -64,9 +64,7 @@ async fn main() -> Result<(), anyhow::Error> {
         Command::Bluesky(bluesky) => {
             Box::new(BlueSkyClient::new(&bluesky.bluesky_handle, &bluesky.bluesky_password).await?)
         }
-        Command::Mastodon(mastodon) => {
-            Box::new(MastodonClient::new(mastodon.access_token))
-        }
+        Command::Mastodon(mastodon) => Box::new(MastodonClient::new(mastodon.access_token)),
     };
 
     while running.load(Ordering::SeqCst) {

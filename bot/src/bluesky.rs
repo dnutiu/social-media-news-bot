@@ -1,7 +1,7 @@
 pub(crate) mod atproto;
 mod token;
 
-use crate::add_image_to_post;
+use crate::bluesky;
 use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
 use anyhow::{Error, anyhow};
 use async_trait::async_trait;
@@ -124,6 +124,18 @@ impl BlueSkyClient {
             .json()
             .await?)
     }
+}
+
+/// Embeds an image to a post.
+async fn add_image_to_post(
+    client: &mut BlueSkyClient,
+    image_url: &str,
+    record: &mut bluesky::atproto::ATProtoRepoCreateRecord,
+) -> Result<(), anyhow::Error> {
+    let thumb = client.upload_image_by_url(image_url).await?;
+    record.record.embed.as_mut().unwrap().external.thumb = Some(thumb.blob);
+
+    Ok(())
 }
 
 #[async_trait]

@@ -27,18 +27,6 @@ fn setup_graceful_shutdown(running: &Arc<AtomicBool>) {
     });
 }
 
-/// Embeds an image to a post.
-async fn add_image_to_post(
-    client: &mut BlueSkyClient,
-    image_url: &str,
-    record: &mut bluesky::atproto::ATProtoRepoCreateRecord,
-) -> Result<(), anyhow::Error> {
-    let thumb = client.upload_image_by_url(image_url).await?;
-    record.record.embed.as_mut().unwrap().external.thumb = Some(thumb.blob);
-
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     env_logger::init();

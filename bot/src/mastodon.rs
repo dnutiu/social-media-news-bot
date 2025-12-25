@@ -1,6 +1,8 @@
 use crate::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
-use anyhow::anyhow;
-use log::debug;
+use anyhow::{anyhow, Error};
+use async_trait::async_trait;
+use log::{debug, error, info};
+use post::{NewsPost, Publisher};
 use reqwest::StatusCode;
 use std::fmt;
 
@@ -85,5 +87,46 @@ impl MastodonClient {
             .error_for_status()?
             .json()
             .await?)
+    }
+}
+
+#[async_trait]
+impl Publisher for MastodonClient {
+    async fn publish_post(&mut self, post: NewsPost) -> Result<(), Error> {
+        // Step1: Upload image to Mastodon
+        let media_response = if post.image.is_some() {
+            let response = self
+                .upload_media_by_url(post.image.clone().unwrap().as_str())
+                .await;
+
+            match response {
+                Ok(response) => Ok(response),
+                Err(err) => Err(anyhow!("failed to upload image: {err}")),
+            }
+        } else {
+            Err(anyhow!("No image exists on post."))
+        };
+
+        // Step2: Post to Mastodon.
+        let mut status: PostStatusRequest = post.into();
+        match media_response {
+            Ok(response) => {
+                status.media_ids.push(response.id);
+            }
+            Err(err) => {
+                error!("Error uploading image: {err}")
+            }
+        }
+        let response = self.post_status(status).await;
+        match response {
+            Ok(response) => {
+                info!("Posted tooth on Mastodon! {response:?}");
+                Ok(())
+            }
+            Err(err) => {
+                error!("Failed to post toot on Mastodon: {err}");
+                Err(err)
+            }
+        }
     }
 }

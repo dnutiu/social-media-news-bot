@@ -1,7 +1,6 @@
 use crate::cli::CliArgs;
-use crate::scrapper::gfourmedia::GFourMedia;
-use crate::scrapper::hotnews::HotNews;
 use crate::scrapper::{ScrappableWebPage, WebScrapperEngine};
+use crate::targets::{GFourMedia, HotNews};
 use clap::Parser;
 use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use infrastructure::RedisService;
@@ -16,6 +15,7 @@ use tokio::task::JoinHandle;
 
 mod cli;
 mod scrapper;
+mod targets;
 
 /// Runs the scheduler in a separated thread.
 ///

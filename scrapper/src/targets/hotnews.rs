@@ -72,8 +72,8 @@ impl ScrappableWebPage for HotNews {
 
 #[cfg(test)]
 mod tests {
+    use crate::HotNews;
     use crate::WebScrapperEngine;
-    use crate::scrapper::hotnews::HotNews;
 
     #[tokio::test]
     async fn sanity_test() {

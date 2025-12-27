@@ -131,16 +131,15 @@ async fn main() -> Result<(), anyhow::Error> {
         info!("Received post {:?}", news_post);
         if news_post.is_complete() {
             let title = news_post.title.clone().unwrap();
-            if !redis_service
-                .is_key_flagged(format!("{}-{}", &args.redis_stream_name, &title).as_str())
-                .await
-            {
+            let unique_post_key = format!("{}-{}", &args.redis_stream_name, &title);
+            let digest = format!("{:x}", md5::compute(unique_post_key));
+            if !redis_service.is_key_flagged(&digest).await {
                 let published = redis_service
                     .publish(&args.redis_stream_name, &news_post)
                     .await;
                 if published {
                     info!("Published {:?}", news_post);
-                    redis_service.flag_key(&title, 60 * 60 * 24 * 14).await;
+                    redis_service.flag_key(&digest, 60 * 60 * 24 * 14).await;
                 }
             };
         }

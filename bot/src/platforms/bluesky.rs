@@ -1,6 +1,6 @@
 mod atproto;
 mod token;
-pub(crate) mod cli;
+pub mod cli;
 
 use crate::platforms::bluesky;
 use crate::platforms::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};

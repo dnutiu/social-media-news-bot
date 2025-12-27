@@ -1,24 +1,6 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 
-/// Bluesky command arguments
-#[derive(Args, Debug)]
-pub struct BlueskyCommand {
-    /// The Bluesky bot user's handle.
-    #[arg(short = 'u', long)]
-    pub bluesky_handle: String,
-
-    /// The Bluesky bot user's password.
-    #[arg(short = 'p', long)]
-    pub bluesky_password: String,
-}
-
-/// Mastodon command arguments
-#[derive(Args, Debug)]
-pub struct MastodonCommand {
-    /// The Bluesky bot user's handle.
-    #[arg(short = 'a', long)]
-    pub access_token: String,
-}
+use crate::platforms::cli::{BlueskyCliArgs, MastodonCliArgs};
 
 #[derive(Parser, Debug)]
 #[command(version, about = "Social media posting bot.", long_about = None)]
@@ -51,8 +33,8 @@ pub struct CliArgs {
 /// Available Subcommands
 #[derive(Subcommand, Debug)]
 pub enum Command {
-    /// Post on bluesky platform.
-    Bluesky(BlueskyCommand),
-    /// Post on Mastodon, the FediVerse
-    Mastodon(MastodonCommand),
+    /// Command to start bot for the Bluesky platform.
+    Bluesky(BlueskyCliArgs),
+    /// Command to start bot for the Mastodon platform, also called the Fediverse.
+    Mastodon(MastodonCliArgs),
 }

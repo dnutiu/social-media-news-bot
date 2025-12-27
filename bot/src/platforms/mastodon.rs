@@ -1,4 +1,4 @@
-use crate::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
+use crate::platforms::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
 use anyhow::{Error, anyhow};
 use async_trait::async_trait;
 use log::{debug, error, info};
@@ -7,6 +7,7 @@ use reqwest::StatusCode;
 use std::fmt;
 
 pub mod api;
+pub mod cli;
 
 /// The Mastodon client for interacting with the platform.
 pub struct MastodonClient {

@@ -1,6 +1,6 @@
-use crate::bluesky::BlueSkyClient;
+use crate::platforms::BlueSkyClient;
 use crate::cli::{CliArgs, Command};
-use crate::mastodon::MastodonClient;
+use crate::platforms::MastodonClient;
 use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};
@@ -9,9 +9,8 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{thread, time};
 
-mod bluesky;
 mod cli;
-mod mastodon;
+mod platforms;
 
 //noinspection DuplicatedCode
 /// Sets up a signal handler in a separate thread to handle SIGINT and SIGTERM signals.

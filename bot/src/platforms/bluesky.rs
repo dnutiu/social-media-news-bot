@@ -1,8 +1,9 @@
-pub(crate) mod atproto;
+mod atproto;
 mod token;
+pub(crate) mod cli;
 
-use crate::bluesky;
-use crate::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
+use crate::platforms::bluesky;
+use crate::platforms::bluesky::atproto::{ATProtoServerCreateSession, BlobResponse};
 use anyhow::{Error, anyhow};
 use async_trait::async_trait;
 use log::{debug, error, info, warn};

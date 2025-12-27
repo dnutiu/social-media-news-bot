@@ -1,9 +1,8 @@
 use crate::cli::{CliArgs, Command};
-use crate::platforms::BlueSkyClient;
-use crate::platforms::MastodonClient;
 use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};
+use platforms::{BlueSkyClient, MastodonClient};
 use post::{NewsPost, Publisher};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};

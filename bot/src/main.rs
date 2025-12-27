@@ -1,5 +1,5 @@
-use crate::platforms::BlueSkyClient;
 use crate::cli::{CliArgs, Command};
+use crate::platforms::BlueSkyClient;
 use crate::platforms::MastodonClient;
 use clap::Parser;
 use infrastructure::RedisService;

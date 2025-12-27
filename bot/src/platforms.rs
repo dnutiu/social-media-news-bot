@@ -1,7 +1,6 @@
-
 mod bluesky;
-mod mastodon;
 pub mod cli;
+mod mastodon;
 // Expose clients
 
 pub use bluesky::BlueSkyClient;

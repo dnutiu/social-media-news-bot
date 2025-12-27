@@ -1,4 +1,6 @@
-use crate::platforms::mastodon::api::{PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest};
+use crate::platforms::mastodon::api::{
+    PartialMediaResponse, PartialPostStatusResponse, PostStatusRequest,
+};
 use anyhow::{Error, anyhow};
 use async_trait::async_trait;
 use log::{debug, error, info};

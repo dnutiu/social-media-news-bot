@@ -67,6 +67,7 @@ test:
   services:
     - docker:24.0.5-dind
   variables:
+    DOCKER_HOST: "unix:///runner/services/docker/docker.sock"
     DOCKER_TLS_CERTDIR: "/certs"
   cache: []
   before_script:

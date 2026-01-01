@@ -43,7 +43,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .create_group(&args.redis_stream_name, &args.redis_consumer_group, 0)
         .await;
     if let Err(err) = result {
-        warn!("{}", err);
+        warn!("Failed to create consumer group and stream: {}", err);
     }
 
     let mut publisher_client: Box<dyn Publisher> = match args.platform {

@@ -66,10 +66,10 @@ impl RedisService {
     ) -> Result<(), anyhow::Error> {
         redis::cmd("XGROUP")
             .arg("CREATE")
-            .arg("MKSTREAM")
             .arg(stream_name)
             .arg(group_name)
             .arg(starting_id)
+            .arg("MKSTREAM")
             .exec_async(&mut self.multiplexed_connection)
             .await
             .map_err(|e| {

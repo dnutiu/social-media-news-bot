@@ -139,7 +139,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     .await;
                 if published {
                     info!("Published {:?}", news_post);
-                    redis_service.flag_key(&digest, 60 * 60 * 24 * 14).await;
+                    redis_service.flag_key(&digest, 60 * 60 * 24 * 90).await;
                 }
             };
         }

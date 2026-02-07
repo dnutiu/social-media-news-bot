@@ -71,6 +71,32 @@ Options:
 
 [1] - https://redis.io/about/
 
+## Development
+
+The rust version used for development is `rustc 1.92.0 (ded5c06cf 2025-12-08)`.
+
+### Running the tests
+
+The tests can be run with `cargo test`.
+
+Tests use testcontainers by default to spin the necessary dependencies, currently only Redis is required.
+Alternatively you can use `REDIS_TESTS_URL` in order to make the tests run agains an existing Redis service.
+
+**Note**: For Podman users you will need to enable the podman socket. Otherwise, testcontainers won't be able to 
+create new containers[1].
+
+```shell
+systemctl enable podman.socket
+podman system service --time=0 &
+```
+
+## Running locally
+
+You can build the project and run each binary separately. A `docker-compose.yml` file is provided in order to start
+necessary dependencies.
+
+[1] - https://podman-desktop.io/tutorial/testcontainers-with-podman
+
 --- 
 
 

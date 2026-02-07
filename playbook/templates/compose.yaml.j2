@@ -1,0 +1,76 @@
+services:
+{% if application.scraper.enabled %}
+  scraper:
+    container_name: {{ application.scraper.container_name | quote }}
+    restart: {{ application.scraper.restart | quote }}
+    image: {{ container.images.scraper | quote }}
+    environment:
+      RUST_LOG: {{ application.log_level }}
+    depends_on:
+      - redis
+    command:
+      - "--redis-connection-string"
+      - "{{ redis.connection_string }}"
+      - "--redis-stream-name"
+      - "{{ redis.stream_name }}"
+      - "--scrape-interval-minutes"
+      - "{{ application.scraper.interval_minutes }}"
+{% endif %}
+{% if application.bluesky.enabled %}
+  bluesky-bot:
+    container_name: {{ application.bluesky.container_name | quote }}
+    restart: {{ application.bluesky.restart | quote }}
+    image: {{ container.images.bot | quote }}
+    depends_on:
+      - redis
+    environment:
+      RUST_LOG: {{ application.log_level }}
+    command:
+      - "--redis-connection-string"
+      - "{{ redis.connection_string }}"
+      - "--redis-stream-name"
+      - "{{ redis.stream_name }}"
+      - "--redis-consumer-group"
+      - "{{ application.bluesky.consumer_group }}"
+      - "--redis-consumer-name"
+      - "{{ application.bluesky.container_name }}"
+      - "bluesky"
+      - "--bluesky-handle"
+      - "{{ application.bluesky.username}}"
+      - "--bluesky-password"
+      - "{{ application.bluesky.password}}"
+{% endif %}
+{% if application.mastodon.enabled %}
+  mastodon-bot:
+    container_name: {{ application.mastodon.container_name | quote }}
+    restart: {{ application.mastodon.restart  | quote }}
+    image: {{ container.images.bot | quote }}
+    environment:
+      RUST_LOG: {{ application.log_level }}
+    depends_on:
+      - redis
+    command:
+      - "--redis-connection-string"
+      - "{{ redis.connection_string }}"
+      - "--redis-stream-name"
+      - "{{ redis.stream_name }}"
+      - "--redis-consumer-group"
+      - "{{ application.mastodon.container_name }}"
+      - "--redis-consumer-name"
+      - "{{ application.mastodon.consumer_group }}"
+      - "mastodon"
+      - "--access-token"
+      - "{{ application.mastodon.access_token }}"
+{% endif %}
+{% if redis.enabled %}
+  redis:
+    container_name: {{ redis.container_name | quote }}
+    restart: {{ redis.restart | quote }}
+    image: {{ container.images.redis | quote }}
+    volumes:
+      - social_media_bot_redis_data:/data
+
+volumes:
+  social_media_bot_redis_data:
+    driver: local
+{% endif %}

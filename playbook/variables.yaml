@@ -1,0 +1,38 @@
+base_directory: "/root/social-media-news-bot"
+container:
+  runtime: "docker" # or podman
+  registry:
+    base_url: "registry.nuculabs.dev"
+    tls_verify: false
+    username: ""
+    password: ""
+  images:
+    scraper: "registry.nuculabs.dev/dnutiu/social-media-news-bot/scrapper"
+    bot: "registry.nuculabs.dev/dnutiu/social-media-news-bot/bot"
+    redis: "redis/redis-stack:7.4.0-v8"
+redis:
+  container_name: "redis"
+  connection_string: "redis://redis:6379"
+  stream_name: "posts::news"
+  restart: "always"
+  enabled: true
+application:
+  log_level: "INFO"
+  scraper:
+    container_name: "news-scrapper"
+    enabled: true
+    restart: "always"
+    interval_minutes: 60
+  bluesky:
+    container_name: "bluesky-boy-1"
+    consumer_group: "bluesky-consumer-group"
+    enabled: true
+    restart: "always"
+    username: "aaa"
+    password: "aaa"
+  mastodon:
+    container_name: "mastodon-boy-1"
+    consumer_group: "mastodon-consumer-group"
+    enabled: true
+    restart: "always"
+    access_token: "aaa"

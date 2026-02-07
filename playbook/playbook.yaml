@@ -1,0 +1,74 @@
+- name: Install Social Media News Bot
+  hosts: nuculabs
+  become: true
+  become_method: sudo
+  vars_files:
+    - variables.yaml
+  tasks:
+    # Create the necessary directories.
+    - name: "Create directories"
+      block:
+        - name: Create base directory
+          ansible.builtin.file:
+            path: "{{ base_directory }}"
+            state: directory
+            mode: "0755"
+          ignore_errors: true
+    - name: Setup Containers (Podman)
+      block:
+        - name: Ensure Podman is installed
+          ansible.builtin.package:
+            name: podman
+            state: present
+        - name: Login to Registry
+          containers.podman.podman_login:
+            registry: "{{ container.registry.base_url }}"
+            username: "{{ container.registry.username }}"
+            password: "{{ container.registry.password }}"
+          no_log: true
+          tls_verify: "{{ container.registry.tls_verify }}"
+        - name: Pull scrapper image
+          containers.podman.podman_image:
+            name: "{{ container.images.scraper }}"
+            state: present
+        - name: Pull Bot image
+          containers.podman.podman_image:
+            name: "{{ container.images.bot }}"
+            state: present
+      when: container.runtime == "podman"
+    - name: Setup Containers (Docker)
+      block:
+        # 1. Install Docker and the required Python SDK
+        - name: Ensure Docker and Python SDK are installed
+          ansible.builtin.package:
+            name:
+              - docker.io       # Package name varies by OS (e.g., docker-ce, docker)
+              - python3-docker  # REQUIRED for community.docker modules
+            state: present
+
+        # 2. Login to Registry
+        - name: Login to Registry
+          community.docker.docker_login:
+            registry_url: "{{ container.registry.base_url }}"
+            username: "{{ container.registry.username }}"
+            password: "{{ container.registry.password }}"
+            # Note: 'tls_verify: false' is NOT supported here.
+            # For insecure registries in Docker, you must configure /etc/docker/daemon.json
+          no_log: true
+
+        # 3. Pull Scraper image
+        - name: Pull scrapper image
+          community.docker.docker_image:
+            name: "{{ container.images.scraper }}"
+            source: pull
+            state: present
+
+        # 4. Pull Bot image
+        - name: Pull Bot image
+          community.docker.docker_image:
+            name: "{{ container.images.bot }}"
+            source: pull
+            state: present
+
+      when: container.runtime == "docker"
+      # TODO: copy compose template and run compose up

@@ -142,24 +142,34 @@ mod tests {
     use redis::RedisResult;
     use serial_test::serial;
     use std::env;
-    use testcontainers::{core::{IntoContainerPort, WaitFor}, runners::AsyncRunner, ContainerAsync, GenericImage};
+    use testcontainers::{
+        ContainerAsync, GenericImage,
+        core::{IntoContainerPort, WaitFor},
+        runners::AsyncRunner,
+    };
 
     async fn setup_redis_container() -> Result<ContainerAsync<GenericImage>, anyhow::Error> {
         Ok(GenericImage::new("redis/redis-stack", "7.4.0-v8")
             .with_exposed_port(6379.tcp())
             .with_wait_for(WaitFor::message_on_stdout("Ready to accept connections"))
-            .start().await?)
+            .start()
+            .await?)
     }
 
     async fn get_redis_url() -> (String, Option<ContainerAsync<GenericImage>>) {
-        if let Ok(url) = env::var("REDIS_TESTS_URL") {
-            if !url.trim().is_empty() {
-                return (url, None);
-            }
+        if let Ok(url) = env::var("REDIS_TESTS_URL")
+            && !url.trim().is_empty()
+        {
+            return (url, None);
         }
 
-        let container = setup_redis_container().await.expect("failed to start redis container");
-        let host_port = container.get_host_port_ipv4(6379.tcp()).await.expect("failed to get host port");
+        let container = setup_redis_container()
+            .await
+            .expect("failed to start redis container");
+        let host_port = container
+            .get_host_port_ipv4(6379.tcp())
+            .await
+            .expect("failed to get host port");
         let redis_connection_string = format!("redis://localhost:{}", host_port);
 
         (redis_connection_string, Some(container))

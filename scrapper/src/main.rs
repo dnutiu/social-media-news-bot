@@ -34,7 +34,7 @@ fn run_scheduler(mut scheduler: AsyncScheduler, running: Arc<AtomicBool>) -> Joi
 }
 
 // Helper function to handle the logic for a single scrape source
-async fn scrape_and_send<S>(source: S, tx: &Sender<NewsPost>, max_posts_per_run: u64)
+async fn scrape_and_send<S>(source: S, tx: &Sender<NewsPost>, max_posts: u64)
 where
     S: ScrappableWebPage + Default,
 {
@@ -43,7 +43,7 @@ where
             for p in posts
                 .iter()
                 .filter(|p| p.is_complete())
-                .take(max_posts_per_run as usize)
+                .take(max_posts as usize)
             {
                 // Log an error if the channel is closed, but don't panic
                 if tx.send(p.clone()).is_err() {
@@ -68,7 +68,7 @@ fn run_scrapping_job(
     scheduler: &mut AsyncScheduler,
     tx: Sender<NewsPost>,
     interval: Interval,
-    max_posts_per_run: u64,
+    max_posts: u64,
 ) {
     scheduler.every(interval).run(move || {
         let tx = tx.clone();
@@ -76,8 +76,8 @@ fn run_scrapping_job(
         async move {
             // Run scrapping jobs concurrently.
             tokio::join!(
-                scrape_and_send::<HotNews>(HotNews::default(), &tx, max_posts_per_run),
-                scrape_and_send::<GFourMedia>(GFourMedia::default(), &tx, max_posts_per_run)
+                scrape_and_send::<HotNews>(HotNews::default(), &tx, max_posts),
+                scrape_and_send::<GFourMedia>(GFourMedia::default(), &tx, max_posts)
             );
         }
     });

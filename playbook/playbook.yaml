@@ -14,6 +14,7 @@
             state: directory
             mode: "0755"
           ignore_errors: true
+
     - name: Setup Containers (Podman)
       block:
         - name: Ensure Podman is installed
@@ -36,6 +37,7 @@
             name: "{{ container.images.bot }}"
             state: present
       when: container.runtime == "podman"
+
     - name: Setup Containers (Docker)
       block:
         # 1. Install Docker and the required Python SDK
@@ -69,6 +71,28 @@
             name: "{{ container.images.bot }}"
             source: pull
             state: present
-
       when: container.runtime == "docker"
-      # TODO: copy compose template and run compose up
+
+    - name: "Copy compose file to the host"
+      ansible.builtin.template:
+        src: ./templates/compose.yaml.j2
+        dest: "{{ base_directory }}/compose.yaml"
+        mode: "0644"
+
+    - name: "Start the services using Docker Compose"
+      community.docker.docker_compose_v2:
+        project_src: "{{ base_directory }}"
+        files:
+          - compose.yaml
+        state: present
+      when: container.runtime == "docker"
+
+    - name: "Start the services using Podman Compose"
+      ansible.builtin.command:
+        cmd: podman-compose -f compose.yaml up -d
+        chdir: "{{ base_directory }}"
+      # Only run if not already running (optional simple check)
+      # or generally safe to re-run as podman-compose handles state
+      register: compose_output
+      changed_when: "'Recreating' in compose_output.stderr or 'Creating' in compose_output.stderr"
+      when: container.runtime == "podman"

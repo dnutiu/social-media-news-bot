@@ -26,8 +26,8 @@
             registry: "{{ container.registry.base_url }}"
             username: "{{ container.registry.username }}"
             password: "{{ container.registry.password }}"
+            tlsverify: "{{ container.registry.tls_verify }}"
           no_log: true
-          tls_verify: "{{ container.registry.tls_verify }}"
         - name: Pull scrapper image
           containers.podman.podman_image:
             name: "{{ container.images.scraper }}"
@@ -44,9 +44,15 @@
         - name: Ensure Docker and Python SDK are installed
           ansible.builtin.package:
             name:
-              - docker.io       # Package name varies by OS (e.g., docker-ce, docker)
-              - python3-docker  # REQUIRED for community.docker modules
+              - docker-ce
+              - python3-pip
             state: present
+
+        - name: "Install docker library via pip"
+          ansible.builtin.pip:
+            name: docker
+            state: present
+            executable: pip3
 
         # 2. Login to Registry
         - name: Login to Registry

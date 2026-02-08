@@ -24,14 +24,14 @@ application:
     restart: "always"
     interval_minutes: 60
   bluesky:
-    container_name: "bluesky-boy-1"
+    container_name: "bluesky-bot-1"
     consumer_group: "bluesky-consumer-group"
     enabled: true
     restart: "always"
     username: "aaa"
     password: "aaa"
   mastodon:
-    container_name: "mastodon-boy-1"
+    container_name: "mastodon-bot-1"
     consumer_group: "mastodon-consumer-group"
     enabled: true
     restart: "always"

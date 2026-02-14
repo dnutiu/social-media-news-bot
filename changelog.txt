@@ -1,0 +1,6 @@
+
+# 2026-02-14
+
+- Add retries to the WebScrapperEngine.
+- Add tests for WebScrapperEngine.
+- Change signature of WebScrapperEngine.

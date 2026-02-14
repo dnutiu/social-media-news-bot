@@ -21,8 +21,8 @@ impl Default for GFourMedia {
 }
 
 impl ScrappableWebPage for GFourMedia {
-    fn get_url(&self) -> &str {
-        &self.url
+    fn get_url(&self) -> String {
+        self.url.clone()
     }
 
     fn get_posts(&self, html: String) -> Result<Vec<NewsPost>, anyhow::Error> {
@@ -110,7 +110,9 @@ mod tests {
 
     #[tokio::test]
     async fn sanity_test() {
-        let posts = WebScrapperEngine::get_posts(GFourMedia::default()).await;
+        let posts = WebScrapperEngine::default()
+            .get_posts(GFourMedia::default())
+            .await;
 
         assert!(posts.is_ok());
 

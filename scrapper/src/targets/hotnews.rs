@@ -21,8 +21,8 @@ impl Default for HotNews {
 }
 
 impl ScrappableWebPage for HotNews {
-    fn get_url(&self) -> &str {
-        &self.url
+    fn get_url(&self) -> String {
+        self.url.clone()
     }
 
     fn get_posts(&self, html: String) -> Result<Vec<NewsPost>, anyhow::Error> {
@@ -77,7 +77,9 @@ mod tests {
 
     #[tokio::test]
     async fn sanity_test() {
-        let posts = WebScrapperEngine::get_posts(HotNews::default()).await;
+        let posts = WebScrapperEngine::default()
+            .get_posts(HotNews::default())
+            .await;
 
         assert!(posts.is_ok());
 

@@ -7,7 +7,8 @@ edition = "2024"
 env_logger = "0.11.5"
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
-reqwest = "0.12.9"
+reqwest = "0.13.2"
+reqwest-retry = "0.9.1"
 scraper = "0.25.0"
 clokwerk = "0.4.0"
 log = "0.4.22"
@@ -16,3 +17,7 @@ post = {path = "../post"}
 infrastructure = { path = "../infrastructure"}
 async-trait = "0.1.89"
 md5 = "0.8.0"
+reqwest-middleware = "0.5.1"
+
+[dev-dependencies]
+wiremock = "0.6.5"

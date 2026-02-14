@@ -34,11 +34,15 @@ fn run_scheduler(mut scheduler: AsyncScheduler, running: Arc<AtomicBool>) -> Joi
 }
 
 // Helper function to handle the logic for a single scrape source
-async fn scrape_and_send<S>(source: S, tx: &Sender<NewsPost>, max_posts: u64)
-where
+async fn scrape_and_send<S>(
+    engine: &WebScrapperEngine,
+    source: S,
+    tx: &Sender<NewsPost>,
+    max_posts: u64,
+) where
     S: ScrappableWebPage + Default,
 {
-    match WebScrapperEngine::get_posts(source).await {
+    match engine.get_posts(source).await {
         Ok(posts) => {
             for p in posts
                 .iter()
@@ -74,10 +78,12 @@ fn run_scrapping_job(
         let tx = tx.clone();
         info!("Running the scrapping job.");
         async move {
+            let engine: WebScrapperEngine = WebScrapperEngine::default();
+
             // Run scrapping jobs concurrently.
             tokio::join!(
-                scrape_and_send::<HotNews>(HotNews::default(), &tx, max_posts),
-                scrape_and_send::<GFourMedia>(GFourMedia::default(), &tx, max_posts)
+                scrape_and_send::<HotNews>(&engine, HotNews::default(), &tx, max_posts),
+                scrape_and_send::<GFourMedia>(&engine, GFourMedia::default(), &tx, max_posts)
             );
         }
     });

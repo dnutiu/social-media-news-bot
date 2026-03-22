@@ -6,38 +6,41 @@ use clokwerk::{AsyncScheduler, Interval, TimeUnits};
 use infrastructure::RedisService;
 use log::{debug, error, info};
 use post::NewsPost;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{Arc, mpsc};
-use std::thread;
 use std::time::Duration;
+use tokio::sync::{mpsc, watch};
 use tokio::task::JoinHandle;
 
 mod cli;
 mod scrapper;
 mod targets;
 
-/// Runs the scheduler in a separated thread.
-///
-/// If CTRL+C is pressed it will set `running` to `true`.
-fn run_scheduler(mut scheduler: AsyncScheduler, running: Arc<AtomicBool>) -> JoinHandle<()> {
+/// Runs the scheduler in a background task until shutdown is requested.
+fn run_scheduler(
+    mut scheduler: AsyncScheduler,
+    mut shutdown_rx: watch::Receiver<bool>,
+) -> JoinHandle<()> {
     tokio::spawn(async move {
+        let mut ticker = tokio::time::interval(Duration::from_millis(100));
         loop {
-            if !running.load(Ordering::SeqCst) {
-                debug!("Used requested shutdown.");
-                break;
+            tokio::select! {
+                _ = shutdown_rx.changed() => {
+                    if *shutdown_rx.borrow() {
+                        debug!("User requested shutdown.");
+                        break;
+                    }
+                }
+                _ = ticker.tick() => {
+                    scheduler.run_pending().await;
+                }
             }
-            scheduler.run_pending().await;
-            tokio::time::sleep(Duration::from_millis(100)).await;
         }
     })
 }
 
-// Helper function to handle the logic for a single scrape source
 async fn scrape_and_send<S>(
     engine: &WebScrapperEngine,
     source: S,
-    tx: &Sender<NewsPost>,
+    tx: &mpsc::Sender<NewsPost>,
     max_posts: u64,
 ) where
     S: ScrappableWebPage + Default,
@@ -49,14 +52,12 @@ async fn scrape_and_send<S>(
                 .filter(|p| p.is_complete())
                 .take(max_posts as usize)
             {
-                // Log an error if the channel is closed, but don't panic
-                if tx.send(p.clone()).is_err() {
+                if tx.send(p.clone()).await.is_err() {
                     error!("Receiver has been dropped. Could not send post: {:?}", p);
                 }
             }
         }
         Err(e) => {
-            // Log the error from the scraping itself
             error!(
                 "Failed to get posts for source {}: {:?}",
                 std::any::type_name::<S>(),
@@ -70,7 +71,7 @@ async fn scrape_and_send<S>(
 /// Runs the scraping job at the specified interval.
 fn run_scrapping_job(
     scheduler: &mut AsyncScheduler,
-    tx: Sender<NewsPost>,
+    tx: mpsc::Sender<NewsPost>,
     interval: Interval,
     max_posts: u64,
 ) {
@@ -80,7 +81,6 @@ fn run_scrapping_job(
         async move {
             let engine: WebScrapperEngine = WebScrapperEngine::default();
 
-            // Run scrapping jobs concurrently.
             tokio::join!(
                 scrape_and_send::<HotNews>(&engine, HotNews::default(), &tx, max_posts),
                 scrape_and_send::<GFourMedia>(&engine, GFourMedia::default(), &tx, max_posts)
@@ -95,28 +95,21 @@ async fn main() -> Result<(), anyhow::Error> {
     let args = CliArgs::parse();
     info!("Starting the program");
 
-    // Redis setup
     let mut redis_service = RedisService::new(&args.redis_connection_string).await;
-
-    // Scheduler setup
     let mut scheduler = AsyncScheduler::new();
+    let (tx, mut rx) = mpsc::channel::<NewsPost>(256);
 
-    // Channel for synchronizing the scrapper and the bot
-    let (tx, rx): (Sender<NewsPost>, Receiver<NewsPost>) = mpsc::channel();
-
-    // Graceful shutdown.
-    let running = Arc::new(AtomicBool::new(true));
-    let r = running.clone();
-
-    thread::spawn(move || {
-        thread::spawn(async move || {
+    let (shutdown_tx, shutdown_rx) = watch::channel(false);
+    tokio::spawn({
+        let shutdown_tx = shutdown_tx.clone();
+        async move {
             if let Err(e) = tokio::signal::ctrl_c().await {
                 error!("Failed to listen for shutdown signal: {}", e);
             } else {
                 info!("Shutdown signal received");
-                r.store(false, Ordering::SeqCst);
+                let _ = shutdown_tx.send(true);
             }
-        });
+        }
     });
 
     run_scrapping_job(
@@ -126,33 +119,45 @@ async fn main() -> Result<(), anyhow::Error> {
         args.max_posts_per_run,
     );
 
-    // Run the scheduler in a separate thread.
-    let handle = run_scheduler(scheduler, running.clone());
+    let handle = run_scheduler(scheduler, shutdown_rx.clone());
+    let mut main_shutdown_rx = shutdown_rx;
 
-    for news_post in rx.iter() {
-        if !running.load(Ordering::SeqCst) {
-            debug!("Used requested shutdown.");
-            break;
-        }
-        info!("Received post {:?}", news_post);
-        if news_post.is_complete() {
-            let title = news_post.title.clone().unwrap();
-            let unique_post_key = format!("{}-{}", &args.redis_stream_name, &title);
-            let digest = format!("{:x}", md5::compute(unique_post_key));
-            if !redis_service.is_key_flagged(&digest).await {
-                let published = redis_service
-                    .publish(&args.redis_stream_name, &news_post)
-                    .await;
-                if published {
-                    info!("Published {:?}", news_post);
-                    redis_service.flag_key(&digest, 60 * 60 * 24 * 90).await;
+    loop {
+        tokio::select! {
+            _ = main_shutdown_rx.changed() => {
+                if *main_shutdown_rx.borrow() {
+                    debug!("User requested shutdown.");
+                    break;
                 }
-            };
+            }
+            maybe_post = rx.recv() => {
+                let Some(news_post) = maybe_post else {
+                    debug!("Scrape channel closed.");
+                    break;
+                };
+
+                info!("Received post {:?}", news_post);
+                if news_post.is_complete() {
+                    let title = news_post.title.clone().unwrap();
+                    let unique_post_key = format!("{}-{}", &args.redis_stream_name, &title);
+                    let digest = format!("{:x}", md5::compute(unique_post_key));
+                    if !redis_service.is_key_flagged(&digest).await {
+                        let published = redis_service
+                            .publish(&args.redis_stream_name, &news_post)
+                            .await;
+                        if published {
+                            info!("Published {:?}", news_post);
+                            redis_service.flag_key(&digest, 60 * 60 * 24 * 90).await;
+                        }
+                    };
+                }
+            }
         }
     }
 
     info!("Stopped the program");
 
+    let _ = shutdown_tx.send(true);
     handle.await?;
 
     Ok(())

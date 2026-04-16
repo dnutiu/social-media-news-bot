@@ -1,6 +1,6 @@
-# Scrapper
+# Scraper
 
-The scrapper component is used as a CLI for scrapping.
+The scraper component is used as a CLI for scrapping.
 
 It has hardcoded websites to scrape information. 
 

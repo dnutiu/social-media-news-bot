@@ -2,7 +2,7 @@
 members = [
     "post",
     "infrastructure",
-    "scrapper", 
+    "scraper",
     "bot",
 ]
 resolver = "2"

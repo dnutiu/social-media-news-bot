@@ -1,4 +1,4 @@
-use crate::scrapper::ScrappableWebPage;
+use crate::scraper::ScrapableWebPage;
 use anyhow::anyhow;
 use post::NewsPost;
 use scraper::{Html, Selector};
@@ -20,7 +20,7 @@ impl Default for GFourMedia {
     }
 }
 
-impl ScrappableWebPage for GFourMedia {
+impl ScrapableWebPage for GFourMedia {
     fn get_url(&self) -> String {
         self.url.clone()
     }

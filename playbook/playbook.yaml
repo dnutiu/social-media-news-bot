@@ -28,7 +28,7 @@
             password: "{{ container.registry.password }}"
             tlsverify: "{{ container.registry.tls_verify }}"
           no_log: true
-        - name: Pull scrapper image
+        - name: Pull scraper image
           containers.podman.podman_image:
             name: "{{ container.images.scraper }}"
             state: present
@@ -65,7 +65,7 @@
           no_log: true
 
         # 3. Pull Scraper image
-        - name: Pull scrapper image
+        - name: Pull scraper image
           community.docker.docker_image:
             name: "{{ container.images.scraper }}"
             source: pull

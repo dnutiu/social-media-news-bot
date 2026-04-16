@@ -7,7 +7,7 @@ container:
     username: ""
     password: ""
   images:
-    scraper: "registry.nuculabs.dev/dnutiu/social-media-news-bot/scrapper"
+    scraper: "registry.nuculabs.dev/dnutiu/social-media-news-bot/scraper"
     bot: "registry.nuculabs.dev/dnutiu/social-media-news-bot/bot"
     redis: "redis/redis-stack:7.4.0-v8"
 redis:
@@ -19,7 +19,7 @@ redis:
 application:
   log_level: "INFO"
   scraper:
-    container_name: "news-scrapper"
+    container_name: "news-scraper"
     enabled: true
     restart: "always"
     interval_minutes: 60

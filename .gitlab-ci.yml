@@ -89,8 +89,8 @@ build:bot:
 build:scrapper:
   extends: .docker-build
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/scrapper
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/scraper
   script:
-    - docker build -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest -f scrapper/docker/Dockerfile .
+    - docker build -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest -f scraper/docker/Dockerfile .
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
     - docker push $IMAGE_NAME:latest

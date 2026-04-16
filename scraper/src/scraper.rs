@@ -4,9 +4,9 @@ use reqwest_middleware::ClientBuilder;
 use reqwest_retry::RetryTransientMiddleware;
 use reqwest_retry::policies::ExponentialBackoff;
 
-/// Represents a web scrapper which is can be scraped by the engine.
+/// Represents a web scraper which is can be scraped by the engine.
 #[async_trait]
-pub(crate) trait ScrappableWebPage: Send + Sync {
+pub(crate) trait ScrapableWebPage: Send + Sync {
     fn get_url(&self) -> String;
     fn get_posts(&self, html: String) -> Result<Vec<NewsPost>, anyhow::Error>;
 }
@@ -30,7 +30,7 @@ impl Default for WebScrapperEngine {
 impl WebScrapperEngine {
     pub async fn get_posts<P>(&self, web_page: P) -> Result<Vec<NewsPost>, anyhow::Error>
     where
-        P: ScrappableWebPage,
+        P: ScrapableWebPage,
     {
         let body = self
             .client
@@ -63,7 +63,7 @@ mod tests {
         }
     }
 
-    impl<'a> ScrappableWebPage for TestScrapper<'a> {
+    impl<'a> ScrapableWebPage for TestScrapper<'a> {
         fn get_url(&self) -> String {
             format!("{}/testing", self.mock_server.uri())
         }

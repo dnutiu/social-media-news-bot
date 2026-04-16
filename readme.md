@@ -26,7 +26,7 @@ It scrapes data from one or more websites and publishes a JSON on **Redis Stream
 It is configured via CLI arguments 
 
 ```bash
-Usage: scrapper [OPTIONS] --redis-connection-string <redis_connection_string> --redis-stream-name <REDIS_STREAM_NAME>
+Usage: scraper [OPTIONS] --redis-connection-string <redis_connection_string> --redis-stream-name <REDIS_STREAM_NAME>
 
 Options:
   -r, --redis-connection-string <redis_connection_string>

@@ -28,6 +28,6 @@ WORKDIR /app
 
 RUN apt-get update && apt-get -y install libssl3 && apt-get -y install ca-certificates
 
-COPY --from=builder /app/target/release/scrapper /app/scrapper
+COPY --from=builder /app/target/release/scraper /app/scraper
 
-ENTRYPOINT ["/app/scrapper"]
+ENTRYPOINT ["/app/scraper"]

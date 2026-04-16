@@ -1,5 +1,5 @@
 use crate::cli::CliArgs;
-use crate::scrapper::{ScrappableWebPage, WebScrapperEngine};
+use crate::scraper::{ScrapableWebPage, WebScrapperEngine};
 use crate::targets::{GFourMedia, HotNews};
 use clap::Parser;
 use clokwerk::{AsyncScheduler, Interval, TimeUnits};
@@ -11,7 +11,7 @@ use tokio::sync::{mpsc, watch};
 use tokio::task::JoinHandle;
 
 mod cli;
-mod scrapper;
+mod scraper;
 mod targets;
 
 /// Runs the scheduler in a background task until shutdown is requested.
@@ -43,7 +43,7 @@ async fn scrape_and_send<S>(
     tx: &mpsc::Sender<NewsPost>,
     max_posts: u64,
 ) where
-    S: ScrappableWebPage + Default,
+    S: ScrapableWebPage + Default,
 {
     match engine.get_posts(source).await {
         Ok(posts) => {

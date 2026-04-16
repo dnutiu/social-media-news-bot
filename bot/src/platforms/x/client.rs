@@ -37,7 +37,7 @@ impl Publisher for XApiClient {
             self.upload_media_by_link(post.link.clone().unwrap_or_default()).await
         } else { Err(anyhow!("no media link found")) };
 
-        let post_text = post::extract_text_from_post(post, 500);
+        let post_text = post::extract_text_from_post(post, 280);
 
         match media_id {
             Ok(media_id) => {

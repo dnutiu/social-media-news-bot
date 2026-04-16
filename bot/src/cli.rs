@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::platforms::cli::{BlueskyCliArgs, MastodonCliArgs};
+use crate::platforms::cli::{BlueskyCliArgs, MastodonCliArgs, XCliArgs};
 
 #[derive(Parser, Debug)]
 #[command(version, about = "Social media posting bot.", long_about = None)]
@@ -37,4 +37,6 @@ pub enum Command {
     Bluesky(BlueskyCliArgs),
     /// Command to start bot for the Mastodon platform, also called the Fediverse.
     Mastodon(MastodonCliArgs),
+    /// Command to start the bot for the X platform.
+    X(XCliArgs)
 }

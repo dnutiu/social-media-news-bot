@@ -2,7 +2,7 @@ use crate::cli::{CliArgs, Command};
 use clap::Parser;
 use infrastructure::RedisService;
 use log::{error, info, warn};
-use platforms::{BlueSkyClient, MastodonClient};
+use platforms::{BlueSkyClient, MastodonClient, XApiClient};
 use post::{NewsPost, Publisher};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -51,6 +51,7 @@ async fn main() -> Result<(), anyhow::Error> {
             Box::new(BlueSkyClient::new(&bluesky.bluesky_handle, &bluesky.bluesky_password).await?)
         }
         Command::Mastodon(mastodon) => Box::new(MastodonClient::new(mastodon.access_token)),
+        Command::X(args) => Box::new(XApiClient::new(args.bearer_code))
     };
 
     while running.load(Ordering::SeqCst) {

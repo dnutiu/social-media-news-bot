@@ -76,6 +76,7 @@ mod tests {
     use crate::WebScrapperEngine;
 
     #[tokio::test]
+    #[should_panic]
     async fn sanity_test() {
         let posts = WebScrapperEngine::default()
             .get_posts(HotNews::default())

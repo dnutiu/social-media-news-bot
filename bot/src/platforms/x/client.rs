@@ -3,15 +3,16 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use post::{NewsPost, Publisher};
 
+#[allow(dead_code)]
 pub struct XApiClient {
     bearer_code: String
-    // todo request client
 }
 
 impl XApiClient {
     /// Constructs a new instance of XAPIClient.
     #[allow(dead_code)]
     pub fn new(bearer_code: String) -> Self {
+        panic!("XApiClient is not implemented yet, feel free to send a PR.");
         Self { bearer_code }
     }
 

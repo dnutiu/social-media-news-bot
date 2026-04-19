@@ -38,5 +38,5 @@ pub enum Command {
     /// Command to start bot for the Mastodon platform, also called the Fediverse.
     Mastodon(MastodonCliArgs),
     /// Command to start the bot for the X platform.
-    X(XCliArgs)
+    X(XCliArgs),
 }

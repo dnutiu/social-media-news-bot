@@ -51,7 +51,12 @@ async fn main() -> Result<(), anyhow::Error> {
             Box::new(BlueSkyClient::new(&bluesky.bluesky_handle, &bluesky.bluesky_password).await?)
         }
         Command::Mastodon(mastodon) => Box::new(MastodonClient::new(mastodon.access_token)),
-        Command::X(args) => Box::new(XApiClient::new(args.bearer_code))
+        Command::X(args) => Box::new(XApiClient::new(
+            args.consumer_key,
+            args.consumer_secret,
+            args.access_token,
+            args.access_token_secret,
+        )),
     };
 
     while running.load(Ordering::SeqCst) {

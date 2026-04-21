@@ -25,7 +25,7 @@ impl XApiClient {
         access_token_secret: String,
     ) -> Self {
         let http_client = reqwest::Client::builder()
-            .user_agent("YourAppName/1.0 (Rust OAuth1)")
+            .user_agent("SocialMediaNewsBot/1.0 (Rust OAuth1)")
             .build()
             .expect("Failed to build HTTP client");
 
